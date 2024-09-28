@@ -42,7 +42,7 @@ resource "aws_dynamodb_table" "dynamodb_table" {
     }
   }
 
-  tags = {
+  tags = merge({
     Name = var.table_name
-  }
+  }, var.tags)
 }
