@@ -2,7 +2,7 @@ variable "bucket_name" {
   description = "The name of the S3 Bucket"
   type        = string
   validation {
-    condition     = length(var.description) > 3 && length(var.description) < 64
+    condition     = length(var.bucket_name) > 3 && length(var.bucket_name) < 64
     error_message = "value"
   }
 }
@@ -48,6 +48,7 @@ variable "bucket_policy" {
   type        = string
   default     = ""
 }
+
 
 variable "tags" {
   description = "A map of tags to assign to the bucket."
