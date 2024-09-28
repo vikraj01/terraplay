@@ -104,3 +104,9 @@ variable "global_secondary_indexes" {
     error_message = "Each global_secondary_index must have a valid projection_type (ALL, KEYS_ONLY, INCLUDE)."
   }
 }
+
+variable "tags" {
+  description = "A map of tags to assign to the dyanmodb table."
+  type        = map(string)
+  default     = {}
+}
