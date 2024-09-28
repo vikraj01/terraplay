@@ -1,12 +1,12 @@
-# variable "billing_mode" {
-#   type    = string
-#   default = "PROVISIONED"
+variable "billing_mode" {
+  type    = string
+  default = "PROVISIONED"
 
-#   validation {
-#     condition     = contains(["PROVISIONED", "PAY_PER_REQUEST"], var.billing_mode)
-#     error_message = "The billing_mode must be either 'PROVISIONED' or 'PAY_PER_REQUEST'."
-#   }
-# }
+  validation {
+    condition     = contains(["PROVISIONED"], var.billing_mode)
+    error_message = "The billing_mode must be either 'PROVISIONED' or 'PAY_PER_REQUEST'."
+  }
+}
 
 variable "table_name" {
   description = "The name of the DynamoDB table."
