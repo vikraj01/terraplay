@@ -71,8 +71,12 @@ variable "egress_rules" {
   default = {}
 }
 
-variable "game" {
-  description = "The name of the game"
-  type        = string
-  default     = ""
+variable "create_key" {
+  type = bool
+  default = false
+}
+
+variable "key_pair_name" {
+  type = string
+  
 }
