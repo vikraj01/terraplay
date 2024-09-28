@@ -21,11 +21,7 @@ variable "subnet_id" {
 variable "key_name" {
   description = "The key pair to use for the instance."
   type        = string
-  default     = ""
-  validation {
-    condition     = length(var.key_name) > 0
-    error_message = "A valid key_name must be provided if SSH access is required."
-  }
+  default     = null
 }
 
 variable "associate_public_ip_address" {

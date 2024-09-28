@@ -18,11 +18,12 @@ module "game-server-firewall" {
   egress_rules  = var.egress_rules
 }
 
-module "game-server" {
-  source             = "./game"
-  subnet_id          = module.terraplay-vpc.public_subnets["public"]
-  security_group_ids = [module.game-server-firewall.security_group_id]
-  game               = var.game
+module "ssh_key" {
+  count = var.create_key ? 1 : 0
+  source            = "./modules/keys"
+  private_key_path  = "${path.module}/sensitive/my_private_key.pem"
+  key_pair_name = var.key_pair_name
 }
+
 
 

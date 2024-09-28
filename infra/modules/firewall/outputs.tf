@@ -12,3 +12,8 @@ output "egress_rule_ids" {
   description = "A list of IDs for the egress rules created"
   value       = [for rule in aws_vpc_security_group_egress_rule.egress_rules : rule.id]
 }
+
+output "sg_vpc"{
+  value = aws_security_group.this.vpc_id
+  description = "VPC ID For The Security Group"
+}
