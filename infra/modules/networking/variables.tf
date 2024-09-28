@@ -25,12 +25,6 @@ variable "subnet_config" {
   }
 }
 
-variable "create_networking" {
-  description = "Boolean to determine whether to set up networking (VPC, subnets, gateway, etc.)"
-  type        = bool
-  default     = false
-}
-
 variable "tags" {
   description = "A map of tags to apply to all resources created in this module"
   type        = map(string)
