@@ -24,3 +24,15 @@ variable "subnet_config" {
     error_message = "The subnet config option must contain a valid CIDR block"
   }
 }
+
+variable "create_networking" {
+  description = "Boolean to determine whether to set up networking (VPC, subnets, gateway, etc.)"
+  type        = bool
+  default     = false
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all resources created in this module"
+  type        = map(string)
+  default     = {}
+}
