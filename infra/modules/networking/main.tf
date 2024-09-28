@@ -8,51 +8,64 @@ locals {
   }
 }
 
-data "aws_availability_zones" "avaliable" {
+data "aws_availability_zones" "available" {
   state = "available"
 }
-resource "aws_vpc" "this" {
-  cidr_block = var.vpc_config.cidr_block
 
+resource "aws_vpc" "this" {
+  count      = var.create_networking ? 1 : 0
+  cidr_block = var.vpc_config.cidr_block
   tags = {
     Name = var.vpc_config.name
+    Type = "Networking"
   }
 }
 
 resource "aws_subnet" "this" {
   for_each          = var.subnet_config
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.this[0].id
   availability_zone = each.value.az
-
-  cidr_block = each.value.cidr_block
+  cidr_block        = each.value.cidr_block
   tags = {
     Name = each.key
+    Type = "Networking"
   }
 
   lifecycle {
     precondition {
-      condition     = contains(data.aws_availability_zones.avaliable.names, each.value.az)
+      condition     = contains(data.aws_availability_zones.available.names, each.value.az)
       error_message = "Invalid AZ"
     }
   }
-}
 
+  depends_on = [aws_vpc.this]
+}
 
 resource "aws_internet_gateway" "this" {
-  count = length(local.public_subnets) > 0 ? 1 : 0
-  vpc_id = aws_vpc.this.id
+  count  = length(local.public_subnets) > 0 ? 1 : 0
+  vpc_id = aws_vpc.this[0].id
+  tags = {
+    Type = "Networking"
+  }
+  depends_on = [aws_vpc.this]
 }
+
 resource "aws_route_table" "public_rtb" {
   count  = length(local.public_subnets) > 0 ? 1 : 0
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.this[0].id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.this[0].id
   }
+
+  depends_on = [aws_vpc.this, aws_internet_gateway.this]
 }
 
 resource "aws_route_table_association" "public_rtb" {
   for_each       = local.public_subnets
   subnet_id      = aws_subnet.this[each.key].id
   route_table_id = aws_route_table.public_rtb[0].id
+
+  depends_on = [aws_vpc.this, aws_route_table.public_rtb]
 }
