@@ -1,9 +1,9 @@
 variable "game" {
   type        = string
   description = "The name of the game server to set up."
-  default = ""
+  default     = ""
   validation {
-    condition = contains(["minecraft", "terraria", "valheim", ""], lower(var.game))
+    condition     = contains(["minecraft", "terraria", "valheim", "minetest", ""], lower(var.game))
     error_message = "The game must be one of: Minecraft, Terraria, Valheim."
   }
 }
@@ -33,7 +33,7 @@ variable "assign_eip" {
 variable "ec2_tags" {
   description = "Additional tags for the EC2 instance."
   type        = map(string)
-  default = {}
+  default     = {}
 }
 
 variable "ebs_volumes" {
@@ -44,4 +44,10 @@ variable "ebs_volumes" {
     volume_type = string
   }))
   default = []
+}
+
+
+variable "key_name" {
+  type    = string
+  default = null
 }
