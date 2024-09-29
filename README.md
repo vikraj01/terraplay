@@ -85,3 +85,6 @@ maybe i will use secrets-manager!
 
 oh oh oh, i can create an oidc for the github actons and connect this to my AWS!
 I can write one script to automate it powerfully! put it into scripts-pool!
+
+
+ngrok config add-authtoken 2ml9xN7HSrWB9ZKSh5s4BVdxQwC_4BDYRg3i3QZdwbSsXrvYY
