@@ -13,4 +13,9 @@ terraform workspace select "$WORKSPACE_NAME" || terraform workspace new "$WORKSP
 terraform apply -var-file="env/${GAME}.tfvars" -var-file="env/common/terraform.tfvars" -auto-approve
 
 server_ip=$(terraform output -raw server_ip)
-echo "server_ip=$server_ip" >> $GITHUB_ENV
+if [ -n "$server_ip" ]; then
+    echo "server_ip=$server_ip" >> $GITHUB_ENV
+else
+    echo "Error: server_ip not found!"
+    exit 1
+fi
