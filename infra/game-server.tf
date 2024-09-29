@@ -19,7 +19,7 @@ locals {
 
 
 module "game-server" {
-  source = "./game"
+  source = "./server"
 
   subnet_id          = local.global_public_subnet_0 != null ? local.global_public_subnet_0 : null
   security_group_ids = local.global_security_group != null ? [local.global_security_group] : []

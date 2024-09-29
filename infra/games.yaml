@@ -1,0 +1,18 @@
+games:
+  minetest:
+    description: "This the required firewall rule for minetest client to connect"
+    ingress_rules:
+    - minetest_tcp:
+        description: "Allow Minecraft Server TCP Traffic"
+        from_port: 30000
+        to_port: 30000
+        protocol: "tcp"
+        cidr_blocks: ["0.0.0.0/0"]
+
+    - minetest_udp:
+        description: "Allow Minecraft Server UDP Traffic"
+        from_port: 30000
+        to_port: 30000
+        protocol: "upd"
+        cidr_blocks: ["0.0.0.0/0"]
+
