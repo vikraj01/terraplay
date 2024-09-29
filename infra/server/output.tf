@@ -1,14 +1,14 @@
 output "instance_id" {
   description = "The ID of the created EC2 instance"
-  value       = module.game_server.instance_id
+  value       = module.game_server[0].instance_id
 }
 
 output "public_ip" {
   description = "The public IP of the EC2 instance"
-  value       = module.game_server.public_ip
+  value       = module.game_server[1].public_ip
 }
 
 output "private_ip" {
   description = "The private IP of the EC2 instance"
-  value       = module.game_server.private_ip
+  value       = module.game_server[2].private_ip
 }
