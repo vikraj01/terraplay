@@ -55,7 +55,7 @@ locals {
 module "server_firewall" {
   for_each      = local.firewall_rules
   source        = "../../modules/firewall"
-  vpc_id        = module.terraplay-vpc.vpc_id
+  vpc_id        = module.terraplay_vpc.vpc_id
   name          = "${each.key}-firewall-rule"
   description   = each.value.description
   ingress_rules = each.value.ingress_rules
