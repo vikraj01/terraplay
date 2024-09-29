@@ -1,12 +1,12 @@
 package bot
 
 import (
-	// "fmt"
 	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/vikraj01/terraplay/internals/github"
+	// "github.com/vikraj01/terraplay/internals/utils"
 )
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
@@ -48,24 +48,22 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	gameName := args[2]
 
-
 	inputs := map[string]string{
 		"game":    gameName,
 		"user_id": m.Author.ID,
+		// "run_id":  utils.GenerateUUID(),
 	}
 	fmt.Print(inputs)
 
-
 	err := github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
 	if err != nil {
+		fmt.Println(err)
 		s.ChannelMessageSend(m.ChannelID, "Failed to trigger GitHub Action to create game session!")
 		return
 	}
 
 	s.ChannelMessageSend(m.ChannelID, "Game session created! GitHub Action triggered for game: "+gameName)
 }
-
-
 
 func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.ChannelMessageSend(m.ChannelID, "Game session destroyed!")
