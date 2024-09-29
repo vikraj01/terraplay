@@ -37,3 +37,10 @@ jobs:
           chmod +x ./scripts/start.sh
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
+      
+      - name: Output Server IP
+        run: |
+          echo "server_ip=$(terraform output -raw server_ip)" >> $GITHUB_ENV
+          echo "game=${{ github.event.inputs.game }}" >> $GITHUB_ENV
+          echo "user_id=${{ github.event.inputs.user_id }}" >> $GITHUB_ENV
+          echo "run_id=${{ github.event.inputs.run_id }}" >> $GITHUB_ENV
