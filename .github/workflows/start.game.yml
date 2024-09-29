@@ -37,12 +37,3 @@ jobs:
           chmod +x ./scripts/start.sh
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
-      
-      - name: Github Output
-        id: set-output
-        run: |
-          run: echo "server_ip=10.10.20.3" >> $GITHUB_OUTPUT
-      
-      - name: Access Output
-        run: |
-          echo "value of server_ip is ${{steps.set-output.outputs.name}}"
