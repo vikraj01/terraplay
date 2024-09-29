@@ -52,6 +52,6 @@ module "ssh_key" {
   source = "../../modules/keys"
 
   private_key_path = "${path.module}/sensitive/my_private_key.pem"
-  
+
   key_pair_name = var.key_pair_name
 }
