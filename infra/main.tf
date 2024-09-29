@@ -10,12 +10,10 @@ data "terraform_remote_state" "global" {
 
 locals {
   global_vpc_id          = try(data.terraform_remote_state.global.outputs.vpc_id, null)
-  global_public_subnet_0 = try(data.terraform_remote_state.global.outputs.public_subnets["public_subnets"].subnet_id, null)
+  global_public_subnet_0 = try(data.terraform_remote_state.global.outputs.subnets["public_subnets"].subnet_id, null)
   global_security_group  = try(data.terraform_remote_state.global.outputs.security_group_ids[local.valid_game], null)
   ssh_key_name           = try(data.terraform_remote_state.global.outputs.aws_key_name, null)
 }
-
-
 
 module "game-server" {
   source             = "./server"
