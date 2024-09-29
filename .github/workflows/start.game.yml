@@ -25,5 +25,5 @@ jobs:
             - name: Setup Infrastructure
               run: |
                 chmod +x ./scripts/start.sh
-                ./scripts/start.sh "{{ github.event.inputs.context }}"
+                ./scripts/start.sh {{ github.event.inputs.context }}
               working-directory: ./infra
