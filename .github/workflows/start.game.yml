@@ -24,6 +24,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      server_ip: ${{ steps.set-output.outputs.server_ip }}  # Define the output at the job level
 
     steps:
       - name: Checkout Code
@@ -38,11 +40,10 @@ jobs:
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
 
-      - name: Github Output
+      - name: Set Output
         id: set-output
-        run: |
-          echo "server_ip=10.10.20.3" >> $GITHUB_OUTPUT
+        run: echo "server_ip=10.10.20.3" >> $GITHUB_OUTPUT  # Set the server_ip as output
       
       - name: Access Output
         run: |
-          echo "value of server_ip is ${{steps.set-output.outputs.name}}"
+          echo "Value of server_ip is ${{ steps.set-output.outputs.server_ip }}"
