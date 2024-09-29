@@ -5,14 +5,14 @@
 
 
 CONTEXT=$1
-RANDOM_ID=$(openssl rand -base64 8)
 
+RANDOM_ID=$(openssl rand -base64 8 | tr -d '=+/')
 WORKSPACE_NAME="$RANDOM_ID@$CONTEXT"
 
 ls -la
 pwd
 
 terraform init --backend-config="./env/backend.conf" --backend-config="key=terraform.tfstate"
-terraform workspace new $WORKSPACE_NAME
-terraform apply -var-file=env/$CONTEXT.tfvars -var-file=env/common/terraform.tfvars
+terraform workspace select "$WORKSPACE_NAME" || terraform workspace new "$WORKSPACE_NAME"
+terraform apply -var-file="env/${CONTEXT}.tfvars" -var-file="env/common/terraform.tfvars" -auto-approve
 
