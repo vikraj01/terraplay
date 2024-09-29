@@ -13,18 +13,7 @@ variable "managed_by" {
   default     = "Terraform"
 }
 
-variable "vpc_cidr" {
-  description = "The CIDR block for the VPC. This defines the IP address range for the VPC."
-  type        = string
-}
-variable "subnet_config" {
-  description = "A map of objects that define the configuration for each subnet, including CIDR block, availability zone (AZ), and an optional flag indicating if it's public."
-  type = map(object({
-    cidr_block = string
-    public     = optional(bool, false)
-    az         = string
-  }))
-}
+
 
 variable "create_networking" {
   description = "Boolean to determine whether to set up networking (VPC, subnets, gateway, etc.)"
@@ -44,32 +33,7 @@ variable "networking_tags" {
   default     = {}
 }
 
-variable "security_group_description" {
-  description = "A description for the security group"
-  type        = string
-}
 
-variable "ingress_rules" {
-  type = map(object({
-    from_port   = number
-    to_port     = number
-    protocol    = string
-    cidr_blocks = list(string)
-    description = string
-  }))
-  default = {}
-}
-
-variable "egress_rules" {
-  type = map(object({
-    from_port   = number
-    to_port     = number
-    protocol    = string
-    cidr_blocks = list(string)
-    description = string
-  }))
-  default = {}
-}
 
 variable "create_key" {
   type = bool
