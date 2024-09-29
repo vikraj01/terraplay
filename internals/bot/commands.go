@@ -6,7 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/vikraj01/terraplay/internals/github"
-	// "github.com/vikraj01/terraplay/internals/utils"
+	"github.com/vikraj01/terraplay/internals/utils"
 )
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
@@ -51,11 +51,12 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	inputs := map[string]string{
 		"game":    gameName,
 		"user_id": m.Author.ID,
-		// "run_id":  utils.GenerateUUID(),
+		"run_id":  utils.GenerateUUID(),
 	}
 	fmt.Print(inputs)
 
 	err := github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
+	fmt.Print(err)
 	if err != nil {
 		fmt.Println(err)
 		s.ChannelMessageSend(m.ChannelID, "Failed to trigger GitHub Action to create game session!")
