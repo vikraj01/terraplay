@@ -11,6 +11,8 @@ WORKSPACE_NAME="$RANDOM_ID@$CONTEXT"
 
 ls -la
 pwd
+echo "$CONTEXT"
+echo "$WORKSPACE_NAME"
 
 terraform init --backend-config="./env/backend.conf" --backend-config="key=terraform.tfstate"
 terraform workspace select "$WORKSPACE_NAME" || terraform workspace new "$WORKSPACE_NAME"
