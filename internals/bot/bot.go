@@ -9,12 +9,18 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	"github.com/vikraj01/terraplay/internals/dynamodb"
 )
 
 func StartBot() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
+	}
+
+	dynamoService, err = dynamodb.InitializeDynamoDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize DynamoDB: %v", err)
 	}
 
 	token := os.Getenv("DISCORD_BOT_TOKEN")
@@ -45,8 +51,6 @@ func StartBot() {
 
 	session.Close()
 }
-
-
 
 // # For First Phase I want to achieve these
 // !create game

@@ -10,7 +10,10 @@ import (
     "log"
     "net/http"
     "os"
+    "time"
+    "path/filepath"
 
+    "github.com/google/uuid"
     "github.com/bwmarrin/discordgo"
 )
 
@@ -38,10 +41,22 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Write the raw body to a file for debugging purposes
-    err = ioutil.WriteFile("webhook_raw_body.json", body, 0644)
+    requestID := uuid.New().String()
+    timestamp := time.Now().Format("20060102_150405")
+    folder := "webhooks_logs"
+
+    err = os.MkdirAll(folder, os.ModePerm)
+    if err != nil {
+        log.Printf("Failed to create folder for logs: %v", err)
+    }
+
+    rawBodyFile := filepath.Join(folder, fmt.Sprintf("webhook_raw_body_%s_%s.json", timestamp, requestID))
+
+    err = ioutil.WriteFile(rawBodyFile, body, 0644)
     if err != nil {
         log.Printf("Failed to write raw body to file: %v", err)
+    } else {
+        log.Printf("Raw body written to: %s", rawBodyFile)
     }
 
     signature := r.Header.Get("X-Hub-Signature-256")
@@ -70,15 +85,18 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Write the parsed and formatted JSON payload to a file
+    parsedPayloadFile := filepath.Join(folder, fmt.Sprintf("webhook_parsed_payload_%s_%s.json", timestamp, requestID))
+
     payloadJSON, err := json.MarshalIndent(payload, "", "  ")
     if err != nil {
         log.Printf("Failed to marshal JSON payload: %v", err)
     }
 
-    err = ioutil.WriteFile("webhook_parsed_payload.json", payloadJSON, 0644)
+    err = ioutil.WriteFile(parsedPayloadFile, payloadJSON, 0644)
     if err != nil {
         log.Printf("Failed to write JSON payload to file: %v", err)
+    } else {
+        log.Printf("Parsed payload written to: %s", parsedPayloadFile)
     }
 
     if payload.WorkflowRun.Status == "completed" {
@@ -87,7 +105,6 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 
     fmt.Fprint(w, "Webhook received and processed")
 }
-
 
 func verifySignature(signature string, body []byte, secret string) bool {
     mac := hmac.New(sha256.New, []byte(secret))
@@ -113,7 +130,6 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
         log.Fatalf("DISCORD_CHANNEL_ID is not set")
     }
 
-    // Log the values for debugging
     log.Printf("UserID: %s, Game: %s, RunID: %s, Status: %s, ServerIP: %s", userID, game, runID, status, serverIP)
 
     dg, err := discordgo.New("Bot " + token)
@@ -123,7 +139,6 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
     }
     defer dg.Close()
 
-    // Check if userID is empty
     if userID == "" {
         log.Printf("UserID is empty, skipping user mention")
     }
@@ -134,7 +149,6 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
         message += fmt.Sprintf("\nServer IP: %s", serverIP)
     }
 
-    // Log the message for debugging
     log.Printf("Sending message to Discord channel %s: %s", channelID, message)
 
     _, err = dg.ChannelMessageSend(channelID, message)
@@ -142,4 +156,3 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
         log.Printf("Failed to send message to Discord: %v", err)
     }
 }
-

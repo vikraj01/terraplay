@@ -61,7 +61,7 @@ global_secondary_indexes = [
     range_key_type     = "S"
     hash_key_type      = "S"
     projection_type    = "ALL"
-    non_key_attributes = []
+    non_key_attributes = [] 
     read_capacity      = 5
     write_capacity     = 5
   }
