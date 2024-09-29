@@ -79,3 +79,9 @@ alias terraform-destroy='ENV=$(terraform workspace show); ENV=${ENV##*@}; terraf
 
 [reddit-aws-host](https://www.reddit.com/r/aws/comments/fss6nx/considering_using_aws_to_host_a_minecraft_server/)
 [How to make cracked minecraft server](https://youtu.be/iJiTsM2MT3c)
+
+
+maybe i will use secrets-manager!
+
+oh oh oh, i can create an oidc for the github actons and connect this to my AWS!
+I can write one script to automate it powerfully! put it into scripts-pool!
