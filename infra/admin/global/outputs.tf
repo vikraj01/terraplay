@@ -15,7 +15,7 @@ output "games" {
 }
 
 # Outputs the security group IDs for each game's firewall. This maps the game name to the security group created for it.
-output "server_firewall_security_group_ids" {
+output "security_group_ids" {
   value       = { for game, mod in module.server_firewall : game => mod.security_group_id }
   description = "Security group IDs for each game's firewall."
 }
@@ -34,8 +34,8 @@ output "vpc_id" {
 # Outputs the public and private subnets created within the VPC.
 output "subnets" {
   value = {
-    public_subnets  = module.terraplay_vpc.public_subnets
-    private_subnets = module.terraplay_vpc.private_subnets
+    public_subnets  = module.terraplay_vpc.public_subnets.public
+    private_subnets = module.terraplay_vpc.private_subnets.private
   }
   description = "Lists the public and private subnets created in the VPC. This can be used to configure EC2 instances or other resources."
 }

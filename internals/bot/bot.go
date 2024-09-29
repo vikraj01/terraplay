@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -28,15 +27,7 @@ func StartBot() {
 		log.Fatalf("Error creating Discord session: %v", err)
 	}
 
-	session.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		if strings.Contains(m.Content, "!ping") {
-			s.ChannelMessageSend(m.ChannelID, "Pong!")
-		}
-	})
+	session.AddHandler(messageHandler)
 
 	session.Identify.Intents = discordgo.IntentsGuildMessages
 
@@ -54,3 +45,19 @@ func StartBot() {
 
 	session.Close()
 }
+
+
+
+// # For First Phase I want to achieve these
+// !create game
+// !destroy <sessionid>
+// !list-session
+
+// # For Next Phase
+// !stop
+// !restart
+
+// # Next Phase
+// !logs
+// !cost
+// !config - config permission for other team member to handle server permission

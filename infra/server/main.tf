@@ -11,7 +11,7 @@ module "game_server" {
 
   ebs_volumes = var.ebs_volumes
 
-  user_data = file("game/config/${lower(var.game)}.sh")
+  user_data = file("server/config/${lower(var.game)}.sh")
 
   ec2_tags = merge(
     {

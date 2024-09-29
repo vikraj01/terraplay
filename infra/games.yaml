@@ -13,6 +13,6 @@ games:
         description: "Allow Minecraft Server UDP Traffic"
         from_port: 30000
         to_port: 30000
-        protocol: "upd"
+        protocol: "udp"
         cidr_blocks: ["0.0.0.0/0"]
 
