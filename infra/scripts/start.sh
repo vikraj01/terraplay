@@ -9,6 +9,9 @@ RANDOM_ID=$(openssl rand -base64 8)
 
 WORKSPACE_NAME="$RANDOM_ID@$CONTEXT"
 
+ls -la
+pwd
+
 terraform init --backend-config="./env/backend.conf" --backend-config="key=terraform.tfstate"
 terraform workspace new $WORKSPACE_NAME
 terraform apply -var-file=env/$CONTEXT.tfvars -var-file=env/common/terraform.tfvars
