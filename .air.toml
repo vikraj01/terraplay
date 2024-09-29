@@ -1,0 +1,13 @@
+# .air.toml config for Air
+
+# Watch root directory and subdirectories for changes
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Command to build your Go project
+cmd = "go build -o ./tmp/main ./cmd/nimbus/main.go"
+# Binary path to run after building
+bin = "./tmp/main"
+# Delays between build and run
+delay = 2000
