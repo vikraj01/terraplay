@@ -4,12 +4,13 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/internals/github"
 )
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
-	"!ping":        handlePingCommand,
-	"!create":      handleCreateCommand,
-	"!destroy":     handleDestroyCommand,
+	"!ping":         handlePingCommand,
+	"!create":       handleCreateCommand,
+	"!destroy":      handleDestroyCommand,
 	"!list-session": handleListSessionCommand,
 }
 
@@ -38,7 +39,25 @@ func handlePingCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
-	s.ChannelMessageSend(m.ChannelID, "Game session created!")
+	args := strings.Fields(m.Content)
+	if len(args) < 2 {
+		s.ChannelMessageSend(m.ChannelID, "Usage: !create <game>")
+		return
+	}
+	gameName := args[1]
+
+	inputs := map[string]string{
+		"game":    gameName,
+		"user_id": m.Author.ID,
+	}
+
+	err := github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Failed to trigger GitHub Action to create game session!")
+		return
+	}
+
+	s.ChannelMessageSend(m.ChannelID, "Game session created! GitHub Action triggered for game: "+gameName)
 }
 
 func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
