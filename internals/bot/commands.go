@@ -2,12 +2,16 @@ package bot
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/internals/dynamodb"
 	"github.com/vikraj01/terraplay/internals/github"
 	"github.com/vikraj01/terraplay/internals/utils"
 )
+
+var dynamoService *dynamodb.DynamoDBService
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
 	"!ping":         handlePingCommand,
@@ -48,6 +52,15 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	gameName := args[2]
 
+	userID := m.Author.ID
+	sessions, err := dynamoService.GetActiveSessionsForUser(userID)
+	if err != nil {
+		log.Printf("Error fetching active sessions for user %s: %v", userID, err)
+		s.ChannelMessageSend(m.ChannelID, "Failed to retrieve active sessions.")
+		return
+	}
+	log.Println(len(sessions))
+
 	inputs := map[string]string{
 		"game":    gameName,
 		"user_id": m.Author.ID,
@@ -55,7 +68,7 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	fmt.Print(inputs)
 
-	err := github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
+	err = github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
 	fmt.Print(err)
 	if err != nil {
 		fmt.Println(err)
