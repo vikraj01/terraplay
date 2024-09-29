@@ -44,3 +44,10 @@ jobs:
           echo "game=${{ github.event.inputs.game }}" >> $GITHUB_ENV
           echo "user_id=${{ github.event.inputs.user_id }}" >> $GITHUB_ENV
           echo "run_id=${{ github.event.inputs.run_id }}" >> $GITHUB_ENV
+
+      - name: Set outputs for inputs
+        run: |
+          echo "::set-output name=game::${{ github.event.inputs.game }}"
+          echo "::set-output name=user_id::${{ github.event.inputs.user_id }}"
+          echo "::set-output name=run_id::${{ github.event.inputs.run_id }}"
+          echo "::set-output name=server_ip::${{ env.server_ip }}"

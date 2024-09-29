@@ -2,7 +2,7 @@
   "action": "completed",
   "workflow_run": {
     "status": "completed",
-    "conclusion": "success",
+    "conclusion": "failure",
     "outputs": {
       "server_ip": ""
     },
