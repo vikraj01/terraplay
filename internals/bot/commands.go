@@ -1,6 +1,8 @@
 package bot
 
 import (
+	// "fmt"
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -44,12 +46,15 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "Usage: !create <game>")
 		return
 	}
-	gameName := args[1]
+	gameName := args[2]
+
 
 	inputs := map[string]string{
 		"game":    gameName,
 		"user_id": m.Author.ID,
 	}
+	fmt.Print(inputs)
+
 
 	err := github.TriggerGithubAction("vikraj01", "terraplay", "start.game.yml", "main", inputs)
 	if err != nil {
@@ -59,6 +64,8 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	s.ChannelMessageSend(m.ChannelID, "Game session created! GitHub Action triggered for game: "+gameName)
 }
+
+
 
 func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.ChannelMessageSend(m.ChannelID, "Game session destroyed!")

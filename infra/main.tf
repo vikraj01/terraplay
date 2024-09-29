@@ -15,7 +15,7 @@ locals {
   ssh_key_name           = try(data.terraform_remote_state.global.outputs.aws_key_name, null)
 }
 
-module "game-server" {
+module "game_server" {
   source             = "./server"
   subnet_id          = local.global_public_subnet_0 != null ? local.global_public_subnet_0 : null
   security_group_ids = local.global_security_group != null ? [local.global_security_group] : []
