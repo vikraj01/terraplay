@@ -15,4 +15,3 @@ games:
         to_port: 30000
         protocol: "udp"
         cidr_blocks: ["0.0.0.0/0"]
-

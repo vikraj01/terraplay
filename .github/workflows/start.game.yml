@@ -1,9 +1,8 @@
 name: Start Game Server
-
 on:
   workflow_dispatch:
     inputs:
-      game: 
+      game:
         description: "What is the context of the infra? (e.g. global or minetest or warzone2100)"
         required: true
         default: 'global'
@@ -25,7 +24,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      server_ip: ${{ steps.set-output.outputs.server_ip }}  # Capture the hardcoded server_ip
+      server_ip: ${{ steps.set-output.outputs.server_ip }}
 
     steps:
       - name: Checkout Code
