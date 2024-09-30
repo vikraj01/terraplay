@@ -14,6 +14,10 @@ import (
 
 func handleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamoService, err := dynamodb.InitializeDynamoDB()
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error Occured while connecting to the dynamodb-database")
+		return 
+	}
 
 	args := strings.Fields(m.Content)
 	if len(args) < 2 {
