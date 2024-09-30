@@ -184,7 +184,7 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string) error {
 		}
 	}
 
-	cleanupExtractedFiles(folder)
+	// cleanupExtractedFiles(folder)
 
 	return nil
 }
