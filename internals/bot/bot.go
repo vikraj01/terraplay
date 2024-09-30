@@ -9,7 +9,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	"github.com/vikraj01/terraplay/internals/dynamodb"
 )
 
 func StartBot() {
@@ -18,7 +17,6 @@ func StartBot() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	dynamoService, err = dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Fatalf("Failed to initialize DynamoDB: %v", err)
 	}

@@ -12,7 +12,6 @@ import (
 
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 )
-var dynamoService *dynamodb.DynamoDBService
 
 type WorkflowRunPayload struct {
 	WorkflowRun struct {
@@ -55,6 +54,11 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 }
 func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload) error {
 	client := &http.Client{}
+	dynamoService, err := dynamodb.InitializeDynamoDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize DynamoDB: %v", err)
+	}
+
 	req, err := http.NewRequest("GET", logsURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %v", err)
@@ -111,12 +115,16 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 
 	status := payload.WorkflowRun.Conclusion
 	sendToDiscord(userID, game, status, serverIP, runID)
+	if dynamoService == nil {
+		log.Println("DynamoDBService is not initialized")
+		return fmt.Errorf("DynamoDBService is not initialized")
+	}
+
 	dynamoService.UpdateSessionStatusAndIP(runID, "running", serverIP)
 
 	cleanupExtractedFiles(folder)
 	return nil
 }
-
 
 func cleanupExtractedFiles(folder string) error {
 	err := os.RemoveAll(folder)
