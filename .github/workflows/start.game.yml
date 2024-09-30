@@ -34,24 +34,11 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Setup Infrastructure
+      - name: Setup Infrastructure And Output
         run: |
           chmod +x ./scripts/start.sh
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
-
-      # Hardcode the server IP
-      - name: Set Hardcoded IP
-        id: set-output
-        run: echo "server_ip=10.10.20.3" >> $GITHUB_OUTPUT  # Hardcoded server_ip
-
-      - name: Access Output
-        run: |
-          echo "Value of server_ip is ${{ steps.set-output.outputs.server_ip }}"
-
-      # Echo the raw Terraform output for debugging
-      - name: Echo Terraform Outputs
-        run: terraform output  # This will print all the Terraform outputs to the logs
 
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
