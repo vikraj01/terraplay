@@ -105,7 +105,20 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
 		log.Fatalf("DISCORD_CHANNEL_ID is not set")
 	}
 
-	log.Printf("UserID: %s, Game: %s, RunID: %s, Status: %s, ServerIP: %s", userID, game, runID, status, serverIP)
+	if userID == "" {
+		userID = "unknown"
+	}
+
+	// If there's an error, customize the message to indicate failure
+	var message string
+	if status != "success" {
+		message = fmt.Sprintf("Error encountered during deployment: %s", runID) // Using runID here for error info
+	} else {
+		message = fmt.Sprintf("<@%s>, your game deployment for '%s' (Run ID: %s) completed with status: %s", userID, game, runID, status)
+		if serverIP != "" {
+			message += fmt.Sprintf("\nServer IP: %s", serverIP)
+		}
+	}
 
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
@@ -114,25 +127,15 @@ func sendToDiscord(userID, game, status, serverIP, runID string) {
 	}
 	defer dg.Close()
 
-	if userID == "" {
-		log.Printf("UserID is empty, skipping user mention")
-	}
-
-	message := fmt.Sprintf("<@%s>, your game deployment for '%s' (Run ID: %s) completed with status: %s", userID, game, runID, status)
-
-	if serverIP != "" {
-		message += fmt.Sprintf("\nServer IP: %s", serverIP)
-	}
-
-	log.Printf("Sending message to Discord channel %s: %s", channelID, message)
-
 	_, err = dg.ChannelMessageSend(channelID, message)
 	if err != nil {
 		log.Printf("Failed to send message to Discord: %v", err)
 	}
 }
 
-func fetchJobLogs(logsURL, folder, timestamp, requestID string) error {
+
+
+func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", logsURL, nil)
 	if err != nil {
@@ -170,24 +173,32 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string) error {
 
 	fmt.Printf("Logs extracted to folder: %s\n", folder)
 
-	// Parse the extracted files for outputs
 	values, err := parseExtractedFiles(folder)
-	if err != nil {
-		return fmt.Errorf("failed to parse extracted files: %v", err)
+	if err != nil || values == nil {
+		errorMessage := fmt.Sprintf("Failed to extract necessary values from logs: %v", err)
+		sendToDiscord("", "", "error", "", errorMessage)
+		return err
 	}
 
-	log.Printf("Extracted values: %v", values)
+	userID := values["user_id"]
+	game := values["game"]
+	serverIP := values["server_ip"]
+	runID := values["run_id"]
 
-	if len(values) > 0 {
-		for _, value := range values {
-			sendToDiscord(value["user_id"], value["game"], "success", value["server_ip"], value["run_id"])
-		}
+	if userID == "" || game == "" || serverIP == "" || runID == "" {
+		errorMessage := fmt.Sprintf("Missing values in logs: game=%s, user_id=%s, server_ip=%s, run_id=%s", game, userID, serverIP, runID)
+		sendToDiscord("", "", "error", "", errorMessage)
+		return fmt.Errorf(errorMessage)
 	}
 
-	// cleanupExtractedFiles(folder)
+	status := payload.WorkflowRun.Conclusion
+	sendToDiscord(userID, game, status, serverIP, runID)
+
+	cleanupExtractedFiles(folder)
 
 	return nil
 }
+
 
 func extractZip(zipFilePath, folder string) error {
 	r, err := zip.OpenReader(zipFilePath)
@@ -256,42 +267,50 @@ func extractZip(zipFilePath, folder string) error {
 	return nil
 }
 
-
-
-func parseExtractedFiles(folder string) ([]map[string]string, error) {
-	var extractedValues []map[string]string
-
-	// List all files in the folder
-	files, err := ioutil.ReadDir(folder)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read directory %s: %v", folder, err)
+func parseExtractedFiles(folder string) (map[string]string, error) {
+	// Initialize a map to store the extracted values
+	values := map[string]string{
+		"game":      "",
+		"run_id":    "",
+		"user_id":   "",
+		"server_ip": "",
 	}
 
-	for _, file := range files {
-		if !file.IsDir() {
-			filePath := filepath.Join(folder, file.Name())
-			
-			// Read the file content
-			data, err := ioutil.ReadFile(filePath)
+	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Check if the file name contains "output"
+		if strings.Contains(strings.ToLower(info.Name()), "output") {
+			data, err := ioutil.ReadFile(path)
 			if err != nil {
-				return nil, fmt.Errorf("failed to read file %s: %v", filePath, err)
+				return fmt.Errorf("failed to read file %s: %v", path, err)
 			}
 
 			content := string(data)
-			
-			// Check for relevant patterns in the file content
-			if strings.Contains(content, "game") || strings.Contains(content, "run_id") || strings.Contains(content, "user_id") {
-				extracted := extractValues(content)
+			extracted := extractValues(content)
 
-				// Add to results only if there are relevant extracted values
-				if extracted["game"] != "" || extracted["run_id"] != "" || extracted["user_id"] != "" || extracted["server_ip"] != "" {
-					extractedValues = append(extractedValues, extracted)
+			// Merge extracted values into the `values` map, only overwriting if non-empty
+			for key, value := range extracted {
+				if value != "" {
+					values[key] = value
 				}
 			}
 		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking through folder %s: %v", folder, err)
 	}
 
-	return extractedValues, nil
+	// Check if we have any values, return nil map if all fields are empty
+	if values["game"] == "" && values["run_id"] == "" && values["user_id"] == "" && values["server_ip"] == "" {
+		return nil, nil
+	}
+
+	return values, nil
 }
 
 func extractValues(content string) map[string]string {
@@ -305,24 +324,28 @@ func extractValues(content string) map[string]string {
 	gamePattern := regexp.MustCompile(`"game":\s*"(.+?)"`)
 	runIDPattern := regexp.MustCompile(`"run_id":\s*"(.+?)"`)
 	userIDPattern := regexp.MustCompile(`"user_id":\s*"(.+?)"`)
-	serverIPPattern := regexp.MustCompile(`(?i)(server_ip)\s*[=:]\s*"([^"]+)"`)
+	serverIPPattern := regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`)
 
-	if match := gamePattern.FindStringSubmatch(content); len(match) > 2 {
-		values["game"] = match[2]
+	gameMatch := gamePattern.FindStringSubmatch(content)
+	runIDMatch := runIDPattern.FindStringSubmatch(content)
+	userIDMatch := userIDPattern.FindStringSubmatch(content)
+	serverIPMatch := serverIPPattern.FindStringSubmatch(content)
+
+	if len(gameMatch) > 1 {
+		values["game"] = gameMatch[1]
 	}
-	if match := runIDPattern.FindStringSubmatch(content); len(match) > 2 {
-		values["run_id"] = match[2]
+	if len(runIDMatch) > 1 {
+		values["run_id"] = runIDMatch[1]
 	}
-	if match := userIDPattern.FindStringSubmatch(content); len(match) > 2 {
-		values["user_id"] = match[2]
+	if len(userIDMatch) > 1 {
+		values["user_id"] = userIDMatch[1]
 	}
-	if match := serverIPPattern.FindStringSubmatch(content); len(match) > 2 {
-		values["server_ip"] = match[2]
+	if len(serverIPMatch) > 1 {
+		values["server_ip"] = serverIPMatch[1]
 	}
 
 	return values
 }
-
 
 func cleanupExtractedFiles(folder string) error {
 	err := os.RemoveAll(folder)
@@ -351,7 +374,7 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 
 	if payload.WorkflowRun.Status == "completed" {
 		log.Printf("Fetching logs for workflow run: %d", payload.WorkflowRun.ID)
-		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID)
+		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload)
 		if err != nil {
 			log.Printf("Failed to fetch logs for workflow run: %v", err)
 		}

@@ -88,7 +88,7 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		SessionId: runId,
 		UserId:    userID,
 		GameName:  gameName,
-		Status:    "waiting",
+		Status:    "pending",
 		StartTime: time.Now(),
 		ServerIP:  "",
 		CreatedAt: time.Now(),
