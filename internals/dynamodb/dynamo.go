@@ -57,17 +57,17 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 			"start_time": {
 				S: aws.String(sessModel.StartTime.Format(time.RFC3339)),
 			},
-			"instance_id": {
-				S: aws.String(sessModel.InstanceID),
-			},
-			"state_file": {
-				S: aws.String(sessModel.StateFile),
-			},
 			"created_at": {
 				S: aws.String(sessModel.CreatedAt.Format(time.RFC3339)),
 			},
 			"updated_at": {
 				S: aws.String(sessModel.UpdatedAt.Format(time.RFC3339)),
+			},
+			"workspace": {
+				S: aws.String(sessModel.WorkSpace),
+			},
+			"server_ip": {
+				S: aws.String(sessModel.ServerIP),
 			},
 		},
 	}
@@ -83,38 +83,37 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 }
 
 func (svc *DynamoDBService) GetActiveSessionsForUser(userID string) ([]models.Session, error) {
-    table := os.Getenv("DYNAMO_TABLE")
-    input := &dynamodb.QueryInput{
-        TableName:              aws.String(table), 
-        IndexName:              aws.String("user_id-index"),
-        KeyConditionExpression: aws.String("user_id = :user_id"),
-        FilterExpression:       aws.String("#status = :status"),
-        ExpressionAttributeNames: map[string]*string{
-            "#status": aws.String("status"),
-        },
-        ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-            ":user_id": {
-                S: aws.String(userID),
-            },
-            ":status": {
-                S: aws.String("active"),
-            },
-        },
-    }
+	table := os.Getenv("DYNAMO_TABLE")
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String(table),
+		IndexName:              aws.String("user_id-index"),
+		KeyConditionExpression: aws.String("user_id = :user_id"),
+		FilterExpression:       aws.String("#status = :status"),
+		ExpressionAttributeNames: map[string]*string{
+			"#status": aws.String("status"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":user_id": {
+				S: aws.String(userID),
+			},
+			":status": {
+				S: aws.String("active"),
+			},
+		},
+	}
 
-    result, err := svc.Client.Query(input)
-    if err != nil {
-        log.Printf("Failed to query active sessions: %v", err)
-        return nil, err
-    }
+	result, err := svc.Client.Query(input)
+	if err != nil {
+		log.Printf("Failed to query active sessions: %v", err)
+		return nil, err
+	}
 
-    var sessions []models.Session
-    err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &sessions)
-    if err != nil {
-        log.Printf("Failed to unmarshal query result: %v", err)
-        return nil, err
-    }
+	var sessions []models.Session
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &sessions)
+	if err != nil {
+		log.Printf("Failed to unmarshal query result: %v", err)
+		return nil, err
+	}
 
-    return sessions, nil
+	return sessions, nil
 }
-
