@@ -67,10 +67,10 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	runId := utils.GenerateUUID()
-	uniqueId := fmt.Sprintf("%s_%s_%d", userID, runId, len(sessions)+1)
+	// uniqueId := fmt.Sprintf("%s_%s_%d", userID, runId, len(sessions)+1)
 	inputs := map[string]string{
 		"game":    gameName,
-		"user_id": uniqueId,
+		"user_id": userID,
 		"run_id":  runId,
 	}
 	fmt.Print(inputs)
