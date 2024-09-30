@@ -9,7 +9,7 @@ var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
 	"!ping":         handlePingCommand,
 	"!create":       handleCreateCommand,
 	"!destroy":      handleDestroyCommand,
-	"!list-session": handleListSessionCommand,
+	"!list-sessions": handleListSessionCommand,
 	"!list-games"  : handleListGamesCommand,
 }
 
