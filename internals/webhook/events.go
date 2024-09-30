@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 )
@@ -17,6 +18,7 @@ type WorkflowRunPayload struct {
 	WorkflowRun struct {
 		ID         int64  `json:"id"`
 		NodeID     string `json:"node_id"`
+		Path       string `json:"path"`
 		Status     string `json:"status"`
 		Conclusion string `json:"conclusion"`
 		WorkflowID int64  `json:"workflow_id"`
@@ -44,16 +46,25 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 		return
 	}
 
-	if payload.WorkflowRun.Status == "completed" {
+	if payload.WorkflowRun.Status == "completed" && payload.WorkflowRun.Path == ".github/workflows/start.game.yml" {
 		log.Printf("Fetching logs for workflow run: %d", payload.WorkflowRun.ID)
-		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload)
+		patterns := map[string]*regexp.Regexp{
+			"game":      regexp.MustCompile(`"game":\s*"(.+?)"`),
+			"run_id":    regexp.MustCompile(`"run_id":\s*"(.+?)"`),
+			"user_id":   regexp.MustCompile(`"user_id":\s*"(.+?)"`),
+			"server_ip": regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`),
+		}
+		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload, patterns)
+
 		if err != nil {
 			log.Printf("Failed to fetch logs for workflow run: %v", err)
 		}
+	} else if payload.WorkflowRun.Status == "completed" && payload.WorkflowRun.Path == ".github/workflows/stop.game.yml" {
+
 	}
 }
 
-func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload) error {
+func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload, patterns map[string]*regexp.Regexp) error {
 	client := &http.Client{}
 	dynamoService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
@@ -96,12 +107,14 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 
 	fmt.Printf("Logs extracted to folder: %s\n", folder)
 
-	values, err := parseExtractedFiles(folder)
+	values, err := parseExtractedFiles(folder, patterns)
 	if err != nil || values == nil {
 		errorMessage := fmt.Sprintf("Failed to extract necessary values from logs: %v", err)
 		sendToDiscord("", "", "error", "", errorMessage)
 		return err
 	}
+
+	// ------------------------------- Need To Make This Part Reusable --------------------------------//
 
 	userID := values["user_id"]
 	game := values["game"]
@@ -126,6 +139,24 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 	cleanupExtractedFiles(folder)
 	return nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func cleanupExtractedFiles(folder string) error {
 	err := os.RemoveAll(folder)
