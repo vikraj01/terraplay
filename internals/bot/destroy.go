@@ -41,10 +41,17 @@ func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = github.TriggerGithubAction("vikraj01", "terraplay", "stop.game.yml", "main", inputs)
 	if err != nil {
 		log.Printf("Failed to trigger GitHub Action: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Failed to trigger GitHub Action to destroy game session.")
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Failed to trigger the destruction of the game session.")
 		return
 	}
 
-	message := fmt.Sprintf("✅ **Game session successfully destroyed!**\n\n**Session ID:** `%s`\n**Workspace ID:** `%s`\n\nThank you for using the Terraplay service!", sessionId, workspaceID)
+	message := fmt.Sprintf(
+		"🛠️ **Destruction of the game session has been initiated!**\n\n"+
+			"**Session ID:** `%s`\n"+
+			"**Workspace ID:** `%s`\n\n"+
+			"Your game session is now in the process of being stopped. "+
+			"Thank you for using the Terraplay service!",
+		sessionId, workspaceID,
+	)
 	s.ChannelMessageSend(m.ChannelID, message)
 }
