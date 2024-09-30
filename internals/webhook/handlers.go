@@ -297,7 +297,7 @@ func extractValues(content string) map[string]string {
 	gamePattern := regexp.MustCompile(`"game":\s*"(.+?)"`)
 	runIDPattern := regexp.MustCompile(`"run_id":\s*"(.+?)"`)
 	userIDPattern := regexp.MustCompile(`"user_id":\s*"(.+?)"`)
-	serverIPPattern := regexp.MustCompile(`"server_ip"\s*[=:]\s*"(.+?)"`)
+	serverIPPattern := regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`)
 
 	gameMatch := gamePattern.FindStringSubmatch(content)
 	runIDMatch := runIDPattern.FindStringSubmatch(content)
