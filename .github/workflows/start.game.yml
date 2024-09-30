@@ -16,10 +16,7 @@ on:
         description: "To track the action workflow dispatch"
         required: true
         type: string
-      server_ip:
-        description: "IP address of the started game server"
-        required: false
-        type: string
+
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -28,7 +25,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      server_ip: ${{ steps.set-output.outputs.server_ip }}  # Define the output at the job level
+      server_ip: ${{ steps.get-server-ip.outputs.server_ip }}  # Capture server_ip from a step
 
     steps:
       - name: Checkout Code
@@ -43,17 +40,16 @@ jobs:
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
 
-      - name: Get Terraform Output (server_ip)
-        id: get-terraform-output
-        run: echo "server_ip=$(terraform output -raw server_ip)" >> $GITHUB_OUTPUT
-        working-directory: ./infra
+      # Fetch the Terraform output
+      - name: Get Terraform Outputs
+        id: get-server-ip
+        run: |
+          server_ip=$(terraform output -raw server_ip)  # Get server_ip output from Terraform
+          echo "server_ip=$server_ip" >> $GITHUB_OUTPUT  # Set it as a GitHub Action output
 
       - name: Access Output
         run: |
-          echo "Server IP: ${{ steps.get-terraform-output.outputs.server_ip }}"
-      
-      - name: Output Inputs with Server IP
-        run: |
-          echo "Updated Inputs with Server IP: "
-          echo "server_ip=${{ steps.get-terraform-output.outputs.server_ip }}"
-          echo "${{ toJSON(github.event.inputs) }}"
+          echo "Value of server_ip is ${{ steps.get-server-ip.outputs.server_ip }}"
+
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
