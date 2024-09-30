@@ -97,7 +97,7 @@ func (svc *DynamoDBService) GetActiveSessionsForUser(userID string) ([]models.Se
 				S: aws.String(userID),
 			},
 			":status": {
-				S: aws.String("active"),
+				S: aws.String("running"),
 			},
 		},
 	}

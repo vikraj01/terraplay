@@ -10,9 +10,9 @@ var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
 	"!create":       handleCreateCommand,
 	"!destroy":      handleDestroyCommand,
 	"!list-session": handleListSessionCommand,
+	"!list-games"  : handleListGamesCommand,
 }
 
-// Central message handler that routes to specific commands
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
