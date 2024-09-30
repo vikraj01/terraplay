@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-
 	go func(){
 		bot.StartBot()
 	}()
@@ -31,5 +30,4 @@ func main() {
 	<-stop
 
 	log.Println("Shutting down both Discord bot and webhook listener...")
-
 }

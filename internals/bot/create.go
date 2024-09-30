@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/config"
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 	"github.com/vikraj01/terraplay/internals/github"
 	"github.com/vikraj01/terraplay/internals/utils"
@@ -23,8 +24,6 @@ func isValidGame(gameName string) bool {
 	}
 	return false
 }
-
-
 
 func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamoService, err := dynamodb.InitializeDynamoDB()
@@ -45,7 +44,16 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	userID := m.Author.ID
 	GlobalName := m.Author.GlobalName
-	sessions, err := dynamoService.GetActiveSessionsForUser(userID)
+
+	status := "running"
+	statusEnum, validStatus := config.StatusValues[status]
+	if !validStatus {
+		return
+	}
+	statusString := config.StatusNames[statusEnum]
+
+	
+	sessions, err := dynamoService.GetActiveSessionsForUser(userID, statusString)
 	if err != nil {
 		log.Printf("Error fetching active sessions for user %s: %v", userID, err)
 		s.ChannelMessageSend(m.ChannelID, "Failed to retrieve active sessions.")
