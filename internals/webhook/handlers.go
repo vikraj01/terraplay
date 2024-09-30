@@ -184,7 +184,7 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string) error {
 		}
 	}
 
-	cleanupExtractedFiles(folder)
+	// cleanupExtractedFiles(folder)
 
 	return nil
 }
@@ -256,31 +256,39 @@ func extractZip(zipFilePath, folder string) error {
 	return nil
 }
 
+
+
 func parseExtractedFiles(folder string) ([]map[string]string, error) {
 	var extractedValues []map[string]string
 
-	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+	// List all files in the folder
+	files, err := ioutil.ReadDir(folder)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory %s: %v", folder, err)
+	}
 
-		if strings.Contains(strings.ToLower(info.Name()), "output") {
-			data, err := ioutil.ReadFile(path)
+	for _, file := range files {
+		if !file.IsDir() {
+			filePath := filepath.Join(folder, file.Name())
+			
+			// Read the file content
+			data, err := ioutil.ReadFile(filePath)
 			if err != nil {
-				return fmt.Errorf("failed to read file %s: %v", path, err)
+				return nil, fmt.Errorf("failed to read file %s: %v", filePath, err)
 			}
 
 			content := string(data)
-			extracted := extractValues(content)
-			if extracted["game"] != "" || extracted["run_id"] != "" || extracted["user_id"] != "" {
-				extractedValues = append(extractedValues, extracted)
+			
+			// Check for relevant patterns in the file content
+			if strings.Contains(content, "game") || strings.Contains(content, "run_id") || strings.Contains(content, "user_id") {
+				extracted := extractValues(content)
+
+				// Add to results only if there are relevant extracted values
+				if extracted["game"] != "" || extracted["run_id"] != "" || extracted["user_id"] != "" || extracted["server_ip"] != "" {
+					extractedValues = append(extractedValues, extracted)
+				}
 			}
 		}
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("error walking through folder %s: %v", folder, err)
 	}
 
 	return extractedValues, nil
@@ -288,37 +296,33 @@ func parseExtractedFiles(folder string) ([]map[string]string, error) {
 
 func extractValues(content string) map[string]string {
 	values := map[string]string{
-		"game":     "",
-		"run_id":   "",
-		"user_id":  "",
+		"game":      "",
+		"run_id":    "",
+		"user_id":   "",
 		"server_ip": "",
 	}
 
 	gamePattern := regexp.MustCompile(`"game":\s*"(.+?)"`)
 	runIDPattern := regexp.MustCompile(`"run_id":\s*"(.+?)"`)
 	userIDPattern := regexp.MustCompile(`"user_id":\s*"(.+?)"`)
-	serverIPPattern := regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`)
+	serverIPPattern := regexp.MustCompile(`(?i)(server_ip)\s*[=:]\s*"([^"]+)"`)
 
-	gameMatch := gamePattern.FindStringSubmatch(content)
-	runIDMatch := runIDPattern.FindStringSubmatch(content)
-	userIDMatch := userIDPattern.FindStringSubmatch(content)
-	serverIPMatch := serverIPPattern.FindStringSubmatch(content)
-
-	if len(gameMatch) > 1 {
-		values["game"] = gameMatch[1]
+	if match := gamePattern.FindStringSubmatch(content); len(match) > 2 {
+		values["game"] = match[2]
 	}
-	if len(runIDMatch) > 1 {
-		values["run_id"] = runIDMatch[1]
+	if match := runIDPattern.FindStringSubmatch(content); len(match) > 2 {
+		values["run_id"] = match[2]
 	}
-	if len(userIDMatch) > 1 {
-		values["user_id"] = userIDMatch[1]
+	if match := userIDPattern.FindStringSubmatch(content); len(match) > 2 {
+		values["user_id"] = match[2]
 	}
-	if len(serverIPMatch) > 1 {
-		values["server_ip"] = serverIPMatch[1]
+	if match := serverIPPattern.FindStringSubmatch(content); len(match) > 2 {
+		values["server_ip"] = match[2]
 	}
 
 	return values
 }
+
 
 func cleanupExtractedFiles(folder string) error {
 	err := os.RemoveAll(folder)
