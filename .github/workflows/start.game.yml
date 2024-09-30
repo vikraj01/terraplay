@@ -23,9 +23,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      server_ip: ${{ steps.set-output.outputs.server_ip }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3

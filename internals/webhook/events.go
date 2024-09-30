@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -54,17 +55,26 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 			"user_id":   regexp.MustCompile(`"user_id":\s*"(.+?)"`),
 			"server_ip": regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`),
 		}
-		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload, patterns)
+		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload, patterns, handleStartAction)
 
 		if err != nil {
 			log.Printf("Failed to fetch logs for workflow run: %v", err)
 		}
 	} else if payload.WorkflowRun.Status == "completed" && payload.WorkflowRun.Path == ".github/workflows/stop.game.yml" {
-
+		log.Printf("Fetching logs for workflow run: %d", payload.WorkflowRun.ID)
+		patterns := map[string]*regexp.Regexp{
+			"run_id": regexp.MustCompile(`"run_id":\s*"(.+?)"`),
+		}
+		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload, patterns, handleStopAction)
+		if err != nil {
+			log.Printf("Failed to fetch logs for workflow run: %v", err)
+		}
 	}
 }
 
-func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload, patterns map[string]*regexp.Regexp) error {
+type LogActionFunc func(values map[string]string, payload WorkflowRunPayload, dynamoService *dynamodb.DynamoDBService, folder string) error
+
+func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload, patterns map[string]*regexp.Regexp, action LogActionFunc) error {
 	client := &http.Client{}
 	dynamoService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
@@ -116,6 +126,10 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 
 	// ------------------------------- Need To Make This Part Reusable --------------------------------//
 
+	return action(values, payload, dynamoService, folder)
+}
+
+func handleStartAction(values map[string]string, payload WorkflowRunPayload, dynamoService *dynamodb.DynamoDBService, folder string) error {
 	userID := values["user_id"]
 	game := values["game"]
 	serverIP := values["server_ip"]
@@ -124,7 +138,7 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 	if userID == "" || game == "" || serverIP == "" || runID == "" {
 		errorMessage := fmt.Sprintf("Missing values in logs: game=%s, user_id=%s, server_ip=%s, run_id=%s", game, userID, serverIP, runID)
 		sendToDiscord("", "", "error", "", errorMessage)
-		return fmt.Errorf(errorMessage)
+		return errors.New(errorMessage)
 	}
 
 	status := payload.WorkflowRun.Conclusion
@@ -140,23 +154,27 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 	return nil
 }
 
+func handleStopAction(values map[string]string, payload WorkflowRunPayload, dynamoService *dynamodb.DynamoDBService, folder string) error {
+	RunID := values["run_id"]
 
+	if RunID == "" {
+		errorMessage := fmt.Sprintf("Missing values in logs: session_id=%s", RunID)
+		sendToDiscord("", "", "error", "", errorMessage)
+		return errors.New(errorMessage)
+	}
 
+	status := payload.WorkflowRun.Conclusion
+	sendToDiscordForStopAction(RunID, status)
 
+	if dynamoService == nil {
+		log.Println("DynamoDBService is not initialized")
+		return fmt.Errorf("DynamoDBService is not initialized")
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	dynamoService.UpdateSessionStatusAndIP(RunID, "terminated", "")
+	cleanupExtractedFiles(folder)
+	return nil
+}
 
 func cleanupExtractedFiles(folder string) error {
 	err := os.RemoveAll(folder)
