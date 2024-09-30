@@ -25,7 +25,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      server_ip: ${{ steps.get-server-ip.outputs.server_ip }}  # Capture server_ip from a step
+      server_ip: ${{ steps.set-output.outputs.server_ip }}  # Capture the hardcoded server_ip
 
     steps:
       - name: Checkout Code
@@ -40,16 +40,18 @@ jobs:
           ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
 
-      # Fetch the Terraform output
-      - name: Get Terraform Outputs
-        id: get-server-ip
-        run: |
-          server_ip=$(terraform output -raw server_ip)  # Get server_ip output from Terraform
-          echo "server_ip=$server_ip" >> $GITHUB_OUTPUT  # Set it as a GitHub Action output
+      # Hardcode the server IP
+      - name: Set Hardcoded IP
+        id: set-output
+        run: echo "server_ip=10.10.20.3" >> $GITHUB_OUTPUT  # Hardcoded server_ip
 
       - name: Access Output
         run: |
-          echo "Value of server_ip is ${{ steps.get-server-ip.outputs.server_ip }}"
+          echo "Value of server_ip is ${{ steps.set-output.outputs.server_ip }}"
+
+      # Echo the raw Terraform output for debugging
+      - name: Echo Terraform Outputs
+        run: terraform output  # This will print all the Terraform outputs to the logs
 
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
