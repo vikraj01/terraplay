@@ -52,6 +52,7 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 		}
 	}
 }
+
 func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload WorkflowRunPayload) error {
 	client := &http.Client{}
 	dynamoService, err := dynamodb.InitializeDynamoDB()
