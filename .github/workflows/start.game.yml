@@ -47,3 +47,6 @@ jobs:
       - name: Access Output
         run: |
           echo "Value of server_ip is ${{ steps.set-output.outputs.server_ip }}"
+      
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"

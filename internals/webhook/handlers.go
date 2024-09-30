@@ -90,7 +90,7 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
     payloadJSON, err := json.MarshalIndent(payload, "", "  ")
     if err != nil {
         log.Printf("Failed to marshal JSON payload: %v", err)
-    }
+    }	
 
     err = ioutil.WriteFile(parsedPayloadFile, payloadJSON, 0644)
     if err != nil {
