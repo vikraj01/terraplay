@@ -117,3 +117,42 @@ func (svc *DynamoDBService) GetActiveSessionsForUser(userID string) ([]models.Se
 
 	return sessions, nil
 }
+func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP string) error {
+	table := os.Getenv("DYNAMO_TABLE")
+
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(table),
+		Key: map[string]*dynamodb.AttributeValue{
+			"session_id": {
+				S: aws.String(sessionID),
+			},
+		},
+		UpdateExpression: aws.String("SET #status = :status, #server_ip = :server_ip, #updated_at = :updated_at"),
+		ExpressionAttributeNames: map[string]*string{
+			"#status":     aws.String("status"),
+			"#server_ip":  aws.String("server_ip"),
+			"#updated_at": aws.String("updated_at"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":status": {
+				S: aws.String(status),
+			},
+			":server_ip": {
+				S: aws.String(serverIP),
+			},
+			":updated_at": {
+				S: aws.String(time.Now().Format(time.RFC3339)),
+			},
+		},
+		ReturnValues: aws.String("UPDATED_NEW"),
+	}
+
+	result, err := svc.Client.UpdateItem(input)
+	if err != nil {
+		log.Printf("Failed to update session: %v", err)
+		return err
+	}
+
+	log.Printf("Session updated successfully: %v", result.Attributes)
+	return nil
+}
