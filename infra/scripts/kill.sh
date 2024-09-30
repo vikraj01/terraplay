@@ -5,7 +5,6 @@ terraform init --backend-config="./env/backend.conf" --backend-config="key=terra
 terraform workspace select $WORKSPACE
 terraform destroy -auto-approve
 terraform workspace select $DEFAULT
-terraform workspace delete $WORKSPACE
 
 if [ "$WORKSPACE" != "$DEFAULT" ]; then
   terraform workspace delete $WORKSPACE
