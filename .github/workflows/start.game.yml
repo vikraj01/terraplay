@@ -20,7 +20,6 @@ on:
         description: "IP address of the started game server"
         required: false
         type: string
-
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,7 +28,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      server_ip: ${{ steps.get-terraform-output.outputs.server_ip }}
+      server_ip: ${{ steps.set-output.outputs.server_ip }}  # Define the output at the job level
 
     steps:
       - name: Checkout Code
@@ -38,13 +37,10 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Initialize Terraform
-        run: terraform init
-        working-directory: ./infra
-
-      - name: Apply Terraform and Get Outputs
-        id: terraform
-        run: terraform apply -auto-approve -input=false
+      - name: Setup Infrastructure
+        run: |
+          chmod +x ./scripts/start.sh
+          ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
 
       - name: Get Terraform Output (server_ip)
