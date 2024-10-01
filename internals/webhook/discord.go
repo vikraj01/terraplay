@@ -68,7 +68,7 @@ func sendToDiscordForStopAction(runID, status string) error {
 	}
 
 	var message string
-	if status == "terminated" {
+	if status == "success" {
 		message = fmt.Sprintf(
 			"🛑 **Session Terminated**\n"+
 				"Run ID: `%s`\n"+

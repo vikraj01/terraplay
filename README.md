@@ -90,3 +90,4 @@ I can write one script to automate it powerfully! put it into scripts-pool!
 ngrok config add-authtoken 2ml9xN7HSrWB9ZKSh5s4BVdxQwC_4BDYRg3i3QZdwbSsXrvYY
 
 https://github.com/orgs/community/discussions/9752
+ngrok http 8080 
