@@ -51,8 +51,6 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	statusString := config.StatusNames[statusEnum]
-
-	
 	sessions, err := dynamoService.GetActiveSessionsForUser(userID, statusString)
 	if err != nil {
 		log.Printf("Error fetching active sessions for user %s: %v", userID, err)
@@ -60,7 +58,7 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if len(sessions) > 5 {
+	if len(sessions) >= 5 {
 		s.ChannelMessageSend(m.ChannelID, "One User Can Only Create 5 Game Sessions At Most")
 		return
 	}

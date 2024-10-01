@@ -20,7 +20,7 @@ func handleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) 
 	}
 
 	args := strings.Fields(m.Content)
-	if len(args) < 2 {
+	if len(args) <= 2 {
 		s.ChannelMessageSend(m.ChannelID, "Usage: !list-session <status> (options: running, terminated, pending, all)")
 		return
 	}

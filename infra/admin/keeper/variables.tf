@@ -48,3 +48,8 @@ variable "managed_by" {
   type        = string
   default     = "Terraform"
 }
+
+
+variable "instance_type" {
+  
+}
