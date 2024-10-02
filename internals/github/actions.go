@@ -16,7 +16,7 @@ type DispatchRequest struct {
 }
 
 func TriggerGithubAction(owner, repo, workflowID, ref string, inputs map[string]string) error {
-	token := os.Getenv("GITHUB_TOKEN")
+	token := os.Getenv("REPO_TOKEN")
 
 	url := fmt.Sprintf(GitHubAPIURL, owner, repo, workflowID)
 

@@ -69,3 +69,9 @@ global_secondary_indexes = [
 
 key_pair_name = "terraplay-key-pair"
 instance_type="t2.micro"
+
+
+
+
+trusted_entities=["ec2.amazonaws.com"]
+ecr_repository_name = "global_terraplay_ecr"
