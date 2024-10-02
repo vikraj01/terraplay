@@ -55,3 +55,31 @@ module "ssh_key" {
 
   key_pair_name = var.key_pair_name
 }
+
+
+
+
+module "bot_server" {
+  source          = "../../modules/compute"
+  subnet_id       = module.terraplay_vpc.public_subnets["public"].subnet_id
+  ami             = data.aws_ami.amazon_linux.id
+  instance_name   = "nimbus_server-${terraform.workspace}"
+  instance_type   = var.instance_type
+  key_name        = module.ssh_key.aws_key_name
+  security_groups = [module.bot_firewall.security_group_id]
+
+  ebs_volumes = [
+    {
+      device_name = "/dev/sdf"
+      volume_size = 50
+      volume_type = "gp3"
+    }
+  ]
+
+  user_data = file("${path.module}/scripts/user_data.sh")
+
+  ec2_tags = {
+    Name = "nimbus-${terraform.workspace}"
+    Type = "Compute"
+  }
+}

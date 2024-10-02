@@ -57,3 +57,19 @@ output "aws_key_name" {
   description = "The AWS key name used for SSH"
   value       = module.ssh_key.aws_key_name
 }
+
+
+output "bot_server_info" {
+  value = {
+    public_ip   = module.bot_server.public_ip
+    instance_id = module.bot_server.instance_id
+    info= module.bot_server.*
+  }
+}
+
+
+output "amzon_linux_2" {
+  value = data.aws_ami.amazon_linux.*
+}
+
+

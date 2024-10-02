@@ -83,5 +83,18 @@ variable "global_secondary_indexes" {
 }
 
 variable "key_pair_name" {
-  
+
+}
+
+variable "instance_type" {
+
+}
+
+variable "ebs_volumes" {
+  type = list(object({
+    device_name = string
+    volume_size = number
+    volume_type = string
+  }))
+  default = []
 }
