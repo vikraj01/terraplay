@@ -2,8 +2,14 @@
 
 IMAGE_NAME="nimbus-bot"
 IMAGE_TAG="latest"
-ECR_URL="<aws_account_id>.dkr.ecr.<region>.amazonaws.com/$IMAGE_NAME"
+ECR_URL="009160067122.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr"
 ENV_FILE=".env"
+AWS_REGION="ap-south-1"
+
+# Sensitive
+
+# Sensitive
+
 
 LOCAL_CONTAINER_NAME="nimbus-bot-local"
 PROD_CONTAINER_NAME="nimbus-bot-prod"
@@ -53,8 +59,8 @@ run_prod() {
     -p 80:8000 \
     -e DISCORD_BOT_TOKEN="$DISCORD_BOT_TOKEN" \
     -e DISCORD_CHANNEL_ID="$DISCORD_CHANNEL_ID" \
-    -e GITHUB_TOKEN="$GITHUB_TOKEN" \
-    -e GITHUB_WEBHOOK_SECRET="$GITHUB_WEBHOOK_SECRET" \
+    -e REPO_TOKEN="$GITHUB_TOKEN" \
+    -e ACTIONS_WEBHOOK_SECRET="$GITHUB_WEBHOOK_SECRET" \
     -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
     -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
     -e AWS_REGION="$AWS_REGION" \
