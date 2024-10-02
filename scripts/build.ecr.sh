@@ -8,7 +8,6 @@ fi
 
 ECR_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 IMAGE_NAME="global_terraplay_ecr"
-IMAGE_TAG=$(date +"%Y%m%d-%H%M")
 
 echo "Logging in to Amazon ECR at $ECR_URL..."
 aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URL}

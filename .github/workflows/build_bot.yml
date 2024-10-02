@@ -9,6 +9,9 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
 
+    outputs:
+        image_tag: ${{ steps.set_tag.outputs.image_tag }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -22,6 +25,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Get current date and time tag
+        id: set_tag
+        run: echo "::set-output name=image_tag::$(date +'%Y%m%d-%H%M')"
 
       - name: Make build script executable
         run: chmod +x ./scripts/build.ecr.sh
@@ -31,3 +38,4 @@ jobs:
         env:
           AWS_REGION: ${{ secrets.AWS_REGION}}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          IMAGE_TAG: ${{ steps.set_tag.outputs.image_tag }}
