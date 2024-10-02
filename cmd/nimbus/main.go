@@ -18,6 +18,7 @@ func main() {
 
 	go func(){
 		http.HandleFunc("/webhook", webhook.HandleWebhook)
+		http.HandleFunc("/health", healthCheckHandler)
 		log.Println("Webhook server listening on port: 8080")
 		err := http.ListenAndServe(":8080", nil)
 		if err != nil {
@@ -30,4 +31,10 @@ func main() {
 	<-stop
 
 	log.Println("Shutting down both Discord bot and webhook listener...")
+}
+
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }

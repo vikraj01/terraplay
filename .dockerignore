@@ -1,0 +1,43 @@
+# Ignore the infra directory (Terraform, scripts, keys, etc.)
+infra/
+
+# Ignore the tmp directory (logs, temporary files)
+tmp/
+
+# Ignore sensitive data (private keys, etc.)
+sensitive/
+*.pem
+
+# Ignore scripts directory (deployment, cleaning scripts)
+scripts/
+
+# Ignore editor and development environment files
+*.log
+*.swp
+*.tmp
+*.bak
+*.DS_Store
+
+# Ignore Go build artifacts and binaries
+*.out
+*.exe
+*.test
+*.a
+
+# Ignore Go mod/cache files (if you don't need them in the final image)
+# go.sum
+# go.mod
+
+# Ignore Dockerfile itself (unless you need it inside the image)
+Dockerfile
+
+# Ignore version control system directories
+.git/
+.gitignore
+
+# Ignore any test-related files
+test/
+*_test.go
+
+# Ignore node_modules if you use any JS libraries (optional)
+node_modules/
