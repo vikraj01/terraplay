@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Check if required environment variables are set
 if [ -z "$AWS_REGION" ] || [ -z "$AWS_ACCOUNT_ID" ]; then
   echo "Error: Missing required environment variables."
   echo "AWS_REGION and AWS_ACCOUNT_ID must be set."
@@ -8,7 +7,7 @@ if [ -z "$AWS_REGION" ] || [ -z "$AWS_ACCOUNT_ID" ]; then
 fi
 
 ECR_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-IMAGE_NAME="nimbus-bot"
+IMAGE_NAME="global_terraplay_ecr"
 IMAGE_TAG="latest"
 
 echo "Logging in to Amazon ECR at $ECR_URL..."
