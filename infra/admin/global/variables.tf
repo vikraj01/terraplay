@@ -98,3 +98,13 @@ variable "ebs_volumes" {
   }))
   default = []
 }
+
+
+variable "ecr_repository_name" {
+  
+}
+
+variable "trusted_entities" {
+  type = list(string)
+  default = [  ]
+}

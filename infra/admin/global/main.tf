@@ -83,3 +83,17 @@ module "bot_server" {
     Type = "Compute"
   }
 }
+
+# module "ec2_role_with_ecr_access" {
+#   source              = "../../modules/roles"
+#   role_name           = "ec2-role-with-ecr-access"
+#   trusted_entities    = var.trusted_entities
+#   managed_policy_arns = [data.aws_iam_policy.ecr_full_access.arn]
+# }
+
+module "global_ecr_repository" {
+  source              = "../../modules/registery"
+  ecr_repository_name = var.ecr_repository_name
+  # iam_role_arn        = module.ec2_role_with_ecr_access.role_arn
+  # depends_on = [ module.ec2_role_with_ecr_access ]
+}

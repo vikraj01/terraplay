@@ -3,7 +3,7 @@ resource "aws_iam_role" "role" {
   description = var.role_description
   path        = var.role_path
 
-  assume_role_policy = jsondecode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       for entity in var.trusted_entities : {

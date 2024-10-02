@@ -73,3 +73,6 @@ output "amzon_linux_2" {
 }
 
 
+output "ecr_repository_url" {
+  value = module.global_ecr_repository.ecr_repository_uri
+}

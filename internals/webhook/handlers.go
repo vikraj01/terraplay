@@ -40,7 +40,7 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secret := os.Getenv("GITHUB_WEBHOOK_SECRET")
+	secret := os.Getenv("ACTIONS_WEBHOOK_SECRET")
 	if secret == "" {
 		log.Println("GITHUB_WEBHOOK_SECRET is not set")
 		http.Error(w, "Secret not set on the server", http.StatusInternalServerError)

@@ -33,3 +33,7 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 }
+
+data "aws_iam_policy" "ecr_full_access" {
+  name = "AmazonEC2ContainerRegistryFullAccess"
+}

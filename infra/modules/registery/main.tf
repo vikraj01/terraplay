@@ -14,14 +14,15 @@ resource "aws_ecr_repository" "ecr_repo" {
     }
   }
 
-  dynamic "lifecycle_policy" {
-    for_each = var.lifecycle_policy_enabled && var.lifecycle_policy != "" ? [1] : []
-    content {
-      policy = var.lifecycle_policy
-    }
-  }
+
 
   tags = var.tags
+}
+
+resource "aws_ecr_lifecycle_policy" "ecr_lifecycle_policy" {
+  count      = var.lifecycle_policy_enabled ? 1 : 0
+  repository = aws_ecr_repository.ecr_repo.name
+  policy     = var.lifecycle_policy
 }
 
 resource "aws_ecr_repository_policy" "ecr_repo_policy" {
