@@ -68,3 +68,4 @@ global_secondary_indexes = [
 ]
 
 key_pair_name = "terraplay-key-pair"
+instance_type="t2.micro"

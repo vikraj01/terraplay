@@ -61,3 +61,11 @@ module "server_firewall" {
   ingress_rules = each.value.ingress_rules
   egress_rules  = each.value.egress_rules
 }
+
+module "bot_firewall" {
+  source = "../../modules/firewall"
+  vpc_id = module.terraplay_vpc.vpc_id
+  name   = "nimbus-firewall"
+  ingress_rules = local.common_ingress_rules
+  egress_rules = local.common_egress_rules
+}
