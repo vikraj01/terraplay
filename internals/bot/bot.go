@@ -12,13 +12,11 @@ import (
 )
 
 func StartBot() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	if err != nil {
-		log.Fatalf("Failed to initialize DynamoDB: %v", err)
+	if os.Getenv("APP_ENV") != "production" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Println("Error loading .env file, using environment variables")
+		}
 	}
 
 	token := os.Getenv("DISCORD_BOT_TOKEN")
