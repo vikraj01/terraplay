@@ -86,7 +86,7 @@ func fetchJobLogs(logsURL, folder, timestamp, requestID string, payload Workflow
 		return fmt.Errorf("failed to create request: %v", err)
 	}
 
-	req.Header.Add("Authorization", "Bearer "+os.Getenv("GITHUB_TOKEN"))
+	req.Header.Add("Authorization", "Bearer "+os.Getenv("REPO_TOKEN"))
 
 	resp, err := client.Do(req)
 	if err != nil {
