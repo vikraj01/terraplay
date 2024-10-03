@@ -26,8 +26,11 @@ ACTIONS_WEBHOOK_SECRET=${ACTIONS_WEBHOOK_SECRET}
 DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
 
-echo "${EC2_SSH_KEY}"
-SSH_CMD="ssh -i ${EC2_SSH_KEY} ${EC2_USER}@${EC2_HOST}"
+echo "${EC2_SSH_KEY}" > ec2_key.pem
+chmod 600 ec2_key.pem
+
+# Define the SSH command
+SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker on EC2"
 $SSH_CMD << EOF
@@ -78,4 +81,6 @@ $SSH_CMD << EOF
       -e APP_ENV=${APP_ENV} \
       ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nimbus-bot:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
+
+rm ec2_key.pem
 echo "Deployment complete!"
