@@ -1,21 +1,5 @@
 #!/bin/bash
 
-# This script assumes that the following environment variables are passed:
-# - EC2_HOST
-# - EC2_USER
-# - EC2_SSH_KEY (the private key for SSH access)
-# - AWS_ACCESS_KEY_ID
-# - AWS_SECRET_ACCESS_KEY
-# - AWS_REGION
-# - AWS_ACCOUNT_ID (your AWS account ID for ECR)
-# - IMAGE_TAG (the Docker image tag to pull)
-# - DISCORD_BOT_TOKEN
-# - DISCORD_CHANNEL_ID
-# - REPO_TOKEN
-# - ACTIONS_WEBHOOK_SECRET
-# - DYNAMO_TABLE
-# - APP_ENV
-
 # Set variables
 EC2_HOST=${EC2_HOST}
 EC2_USER=${EC2_USER}
@@ -32,32 +16,46 @@ ACTIONS_WEBHOOK_SECRET=${ACTIONS_WEBHOOK_SECRET}
 DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
 
-# Define the SSH command
+echo "Starting SSH connection to update and install Docker on EC2"
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ${EC2_SSH_KEY} ${EC2_USER}@${EC2_HOST}"
 
-# Update the EC2 instance and install Docker
 $SSH_CMD << EOF
+    echo "Updating EC2 instance"
     sudo yum update -y
+
+    echo "Installing Docker"
     sudo amazon-linux-extras install docker -y
+
+    echo "Starting Docker service"
     sudo systemctl start docker
+
+    echo "Enabling Docker service to run on boot"
     sudo systemctl enable docker
+
+    echo "Adding user to Docker group"
     sudo usermod -aG docker ec2-user
+
+    echo "Restarting Docker service"
     sudo systemctl restart docker
 EOF
 
-# Deploy the application
+echo "SSH connection complete. Docker setup finished."
+
+echo "Deploying the application on EC2"
 $SSH_CMD << EOF
-    # Log in to AWS ECR securely
+    echo "Logging in to AWS ECR"
     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-    # Pull the Docker image with the correct tag
+    echo "Pulling Docker image from ECR"
     docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nimbus-bot:${IMAGE_TAG}
 
-    # Stop and remove the existing container, if it's running
+    echo "Stopping existing container if running"
     docker stop nimbus-bot || true
+
+    echo "Removing existing container if present"
     docker rm nimbus-bot || true
 
-    # Run the new Docker container with environment variables passed in
+    echo "Running the new Docker container"
     docker run -d --name nimbus-bot -p 80:8000 \
       -e DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} \
       -e DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID} \
