@@ -8,16 +8,16 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 )
 
 func StartBot() {
-	if os.Getenv("APP_ENV") != "production" {
-		err := godotenv.Load()
-		if err != nil {
-			log.Println("Error loading .env file, using environment variables")
-		}
-	}
+	// if os.Getenv("APP_ENV") != "production" {
+	// 	err := godotenv.Load()
+	// 	if err != nil {
+	// 		log.Println("Error loading .env file, using environment variables")
+	// 	}
+	// }
 
 	token := os.Getenv("DISCORD_BOT_TOKEN")
 	if token == "" {
