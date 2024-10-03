@@ -26,7 +26,7 @@ ACTIONS_WEBHOOK_SECRET=${ACTIONS_WEBHOOK_SECRET}
 DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
 
-# Define the SSH command
+echo "${EC2_SSH_KEY}"
 SSH_CMD="ssh -i ${EC2_SSH_KEY} ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker on EC2"
