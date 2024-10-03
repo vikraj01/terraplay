@@ -38,5 +38,5 @@ jobs:
           DYNAMO_TABLE: ${{ secrets.DYNAMO_TABLE }}
           APP_ENV: ${{ secrets.APP_ENV }}
         run: |
-          chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh
+          chmod +x ./scripts/deploy-bot.sh
+          ./scripts/deploy-bot.sh
