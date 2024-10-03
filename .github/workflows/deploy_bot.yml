@@ -59,6 +59,9 @@ jobs:
             # Log in to AWS ECR securely using --password-stdin
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
             
+            # Ensure the image tag exists (debugging)
+            echo "Image tag: ${{ needs.build_bot.outputs.image_tag }}"
+            
             # Pull the latest Docker image using the dynamic tag
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
             
