@@ -30,7 +30,18 @@ jobs:
           port: 22
           script: |
             docker login -u AWS -p $(aws ecr get-login-password --region ap-south-1) ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/nimbus-bot:${{ needs.build_bot.outputs.image_tag }}
-            docker stop nimbus-bot || true
-            docker rm nimbus-bot || true
-            docker run -d --name nimbus-bot -p 80:8000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/nimbus-bot:latest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
+            docker stop global_terrapla || true
+            docker rm global_terraplay || true
+            docker run -d --name global_terraplay -p 80:8000 \
+              -e DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} \
+              -e DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }} \
+              -e REPO_TOKEN=${{ secrets.REPO_TOKEN }} \
+              -e ACTIONS_WEBHOOK_SECRET=${{ secrets.ACTIONS_WEBHOOK_SECRET }} \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_REGION=${{ secrets.AWS_REGION }} \
+              -e DYNAMO_TABLE=${{ secrets.DYNAMO_TABLE }} \
+              -e APP_ENV=${{ secrets.APP_ENV }} \
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
+
