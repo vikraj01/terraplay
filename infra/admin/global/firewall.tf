@@ -66,6 +66,13 @@ module "bot_firewall" {
   source = "../../modules/firewall"
   vpc_id = module.terraplay_vpc.vpc_id
   name   = "nimbus-firewall"
-  ingress_rules = local.common_ingress_rules
+  ingress_rules = merge(local.common_ingress_rules, {
+    nimbus_traffic = {
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTP/HTTPS traffic on port 8080 from anywhere"
+  } })
   egress_rules = local.common_egress_rules
 }
