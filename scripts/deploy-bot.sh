@@ -1,18 +1,14 @@
 #!/bin/bash
 
-# Exit immediately if any command exits with a non-zero status
 set -e
 
-# Function to handle errors and print custom messages
 error_handler() {
     echo "Error occurred in script at line: ${1}"
     exit 1
 }
 
-# Trap errors and call the error_handler function with the failing line number
 trap 'error_handler $LINENO' ERR
 
-# Set variables
 EC2_HOST=${EC2_HOST}
 EC2_USER=${EC2_USER}
 AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -29,11 +25,9 @@ APP_ENV=${APP_ENV}
 IMAGE_NAME="global_terraplay_ecr"
 CONTAINER_NAME="nimbus-bot"
 
-# Write the SSH key to a file and set correct permissions
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
 
-# Define the SSH command
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker and AWS CLI on EC2"
@@ -56,7 +50,6 @@ $SSH_CMD << EOF
     echo "Restarting Docker service"
     sudo systemctl restart docker || { echo "Failed to restart Docker service"; exit 1; }
 
-    # Check if AWS CLI is installed and update it, otherwise install it
     if aws --version 2>&1 >/dev/null; then
         echo "AWS CLI is already installed, updating it"
         sudo ./aws/install --update || { echo "Failed to update AWS CLI"; exit 1; }
@@ -79,7 +72,6 @@ $SSH_CMD << EOF
     aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
     aws configure set region ${AWS_REGION}
 
-    # Check if the container exists
     if [ \$(docker ps -a -q --filter name=${CONTAINER_NAME}) ]; then
         echo "Stopping and removing the existing container: ${CONTAINER_NAME}"
         docker stop ${CONTAINER_NAME} || true
@@ -108,7 +100,6 @@ $SSH_CMD << EOF
       ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
 
-# Clean up the SSH key file after deployment
 rm ec2_key.pem
 
 echo "Deployment complete!"
