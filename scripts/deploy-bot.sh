@@ -3,13 +3,11 @@
 # Exit immediately if any command exits with a non-zero status
 set -e
 
-# Function to handle errors and print custom messages
 error_handler() {
     echo "Error occurred in script at line: ${1}"
     exit 1
 }
 
-# Trap errors and call the error_handler function with the failing line number
 trap 'error_handler $LINENO' ERR
 
 # Set variables
@@ -29,7 +27,7 @@ DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
 
 # Define the SSH command
-SSH_CMD="ssh -o StrictHostKeyChecking=no -i ${EC2_SSH_KEY} ${EC2_USER}@${EC2_HOST}"
+SSH_CMD="ssh -i ${EC2_SSH_KEY} ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker on EC2"
 $SSH_CMD << EOF
