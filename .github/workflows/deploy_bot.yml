@@ -21,6 +21,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
+      - name: SSH into EC2 and Install Docker
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # Update the package list
+            sudo apt-get update
+            
+            # Install Docker
+            sudo apt-get install -y docker.io
+            
+            # Add the current user to the Docker group to avoid needing sudo
+            sudo usermod -aG docker $USER
+            
+            # Start Docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+
       - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -29,10 +50,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            # Log in to AWS ECR
             docker login -u AWS -p $(aws ecr get-login-password --region ap-south-1) ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
+            
+            # Pull the latest image
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
-            docker stop global_terrapla || true
+            
+            # Stop and remove the existing container
+            docker stop global_terraplay || true
             docker rm global_terraplay || true
+            
+            # Run the new container with environment variables
             docker run -d --name global_terraplay -p 80:8000 \
               -e DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} \
               -e DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }} \
@@ -44,4 +72,3 @@ jobs:
               -e DYNAMO_TABLE=${{ secrets.DYNAMO_TABLE }} \
               -e APP_ENV=${{ secrets.APP_ENV }} \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
-
