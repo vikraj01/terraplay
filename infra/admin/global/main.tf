@@ -100,5 +100,15 @@ module "global_ecr_repository" {
 
 
 
+resource "aws_s3_bucket" "global_bucket" {
+  bucket = "global-bucket-893606"
 
+}
 
+output "global_bucket_name" {
+  value = aws_s3_bucket.global_bucket.bucket
+}
+
+output "global_bucket_id" {
+  value = aws_s3_bucket.global_bucket.id
+}
