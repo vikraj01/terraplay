@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-        image_tag: ${{ steps.set_tag.outputs.image_tag }}
+      image_tag: ${{ env.image_tag }}  # Correct reference for image_tag
 
     steps:
       - name: Checkout code
@@ -28,7 +28,7 @@ jobs:
       
       - name: Get current date and time tag
         id: set_tag
-        run: echo "::set-output name=image_tag::$(date +'%Y%m%d-%H%M')"
+        run: echo "image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV  # Correct way to set outputs in GitHub Actions
 
       - name: Make build script executable
         run: chmod +x ./scripts/build.ecr.sh
@@ -36,6 +36,6 @@ jobs:
       - name: Run build and push script
         run: ./scripts/build.ecr.sh
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION}}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          IMAGE_TAG: ${{ steps.set_tag.outputs.image_tag }}
+          IMAGE_TAG: ${{ env.image_tag }}  # Pass the image_tag from environment
