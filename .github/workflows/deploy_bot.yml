@@ -60,10 +60,10 @@ jobs:
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
             
             # Ensure the image tag exists (debugging)
-            echo "Image tag: ${{ needs.build_bot.outputs.image_tag }}"
+            echo "Image tag: ${{ needs.build_and_push.outputs.image_tag }}"
             
             # Pull the latest Docker image using the dynamic tag
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_and_push.outputs.image_tag }}
             
             # Stop and remove the existing container, if it's running
             docker stop global_terraplay || true
@@ -80,4 +80,4 @@ jobs:
               -e AWS_REGION=${{ secrets.AWS_REGION }} \
               -e DYNAMO_TABLE=${{ secrets.DYNAMO_TABLE }} \
               -e APP_ENV=${{ secrets.APP_ENV }} \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_and_push.outputs.image_tag }}
