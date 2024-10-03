@@ -30,7 +30,7 @@ jobs:
         id: set_tag
         run: echo "::set-output name=image_tag::$(date +'%Y%m%d-%H%M')"
 
-
+ 
       - name: Make build script executable
         run: chmod +x ./scripts/build.ecr.sh
 
