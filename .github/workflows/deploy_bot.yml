@@ -14,6 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # AWS Credentials Setup for EC2 and ECR Access
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -21,7 +22,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: SSH into EC2 and Install Docker
+      # SSH into EC2 and Install Docker on Amazon Linux 2
+      - name: Install Docker on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -30,19 +32,23 @@ jobs:
           port: 22
           script: |
             # Update the package list
-            sudo apt-get update
-            
-            # Install Docker
-            sudo apt-get install -y docker.io
-            
-            # Add the current user to the Docker group to avoid needing sudo
-            sudo usermod -aG docker $USER
-            
-            # Start Docker
+            sudo yum update -y
+
+            # Install Docker on Amazon Linux 2
+            sudo amazon-linux-extras install docker -y
+
+            # Start Docker and enable it to run on boot
             sudo systemctl start docker
             sudo systemctl enable docker
 
-      - name: SSH into EC2 and Deploy
+            # Add the ec2-user to the docker group (or replace with your user)
+            sudo usermod -aG docker ec2-user
+
+            # Restart Docker to apply changes
+            sudo systemctl restart docker
+
+      # SSH into EC2 to Deploy Application
+      - name: Deploy Application on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -53,14 +59,14 @@ jobs:
             # Log in to AWS ECR
             docker login -u AWS -p $(aws ecr get-login-password --region ap-south-1) ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
             
-            # Pull the latest image
+            # Pull the latest Docker image using the dynamic tag
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
             
-            # Stop and remove the existing container
+            # Stop and remove the existing container, if it's running
             docker stop global_terraplay || true
             docker rm global_terraplay || true
-            
-            # Run the new container with environment variables
+
+            # Run the new Docker container with environment variables passed in
             docker run -d --name global_terraplay -p 80:8000 \
               -e DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} \
               -e DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }} \
