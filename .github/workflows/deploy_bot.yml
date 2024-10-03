@@ -56,8 +56,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            # Log in to AWS ECR
-            docker login -u AWS -p $(aws ecr get-login-password --region ap-south-1) ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
+            # Log in to AWS ECR securely using --password-stdin
+            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
             
             # Pull the latest Docker image using the dynamic tag
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/global_terraplay_ecr:${{ needs.build_bot.outputs.image_tag }}
