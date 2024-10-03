@@ -95,7 +95,7 @@ $SSH_CMD << EOF
     docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
 
     echo "Running the new Docker container"
-    docker run -d --name ${CONTAINER_NAME} -p 80:8080 \
+    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 \
       -e DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} \
       -e DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID} \
       -e REPO_TOKEN=${REPO_TOKEN} \
