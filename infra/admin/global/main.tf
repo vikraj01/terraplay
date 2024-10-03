@@ -97,3 +97,8 @@ module "global_ecr_repository" {
   # iam_role_arn        = module.ec2_role_with_ecr_access.role_arn
   # depends_on = [ module.ec2_role_with_ecr_access ]
 }
+
+
+
+
+
