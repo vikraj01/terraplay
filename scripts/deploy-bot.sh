@@ -26,7 +26,7 @@ REPO_TOKEN=${REPO_TOKEN}
 ACTIONS_WEBHOOK_SECRET=${ACTIONS_WEBHOOK_SECRET}
 DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
-
+IMAGE_NAME="global_terraplay_ecr"
 # Write the SSH key to a file and set correct permissions
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
@@ -76,7 +76,7 @@ $SSH_CMD << EOF
     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com || { echo "Failed to login to AWS ECR"; exit 1; }
 
     echo "Pulling Docker image from ECR"
-    docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nimbus-bot:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
+    docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
 
     echo "Stopping existing container if running"
     docker stop nimbus-bot || true
@@ -95,7 +95,7 @@ $SSH_CMD << EOF
       -e AWS_REGION=${AWS_REGION} \
       -e DYNAMO_TABLE=${DYNAMO_TABLE} \
       -e APP_ENV=${APP_ENV} \
-      ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nimbus-bot:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
+      ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
 
 # Clean up the SSH key file after deployment
