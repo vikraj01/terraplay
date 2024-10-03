@@ -27,6 +27,8 @@ ACTIONS_WEBHOOK_SECRET=${ACTIONS_WEBHOOK_SECRET}
 DYNAMO_TABLE=${DYNAMO_TABLE}
 APP_ENV=${APP_ENV}
 IMAGE_NAME="global_terraplay_ecr"
+CONTAINER_NAME="nimbus-bot"
+
 # Write the SSH key to a file and set correct permissions
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
@@ -54,14 +56,19 @@ $SSH_CMD << EOF
     echo "Restarting Docker service"
     sudo systemctl restart docker || { echo "Failed to restart Docker service"; exit 1; }
 
-    echo "Installing AWS CLI"
-    sudo yum install -y unzip || { echo "Failed to install unzip"; exit 1; }
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" || { echo "Failed to download AWS CLI"; exit 1; }
-    unzip awscliv2.zip || { echo "Failed to unzip AWS CLI"; exit 1; }
-    sudo ./aws/install || { echo "Failed to install AWS CLI"; exit 1; }
-
-    echo "Cleaning up AWS CLI installation files"
-    rm -rf awscliv2.zip aws
+    # Check if AWS CLI is installed and update it, otherwise install it
+    if aws --version 2>&1 >/dev/null; then
+        echo "AWS CLI is already installed, updating it"
+        sudo ./aws/install --update || { echo "Failed to update AWS CLI"; exit 1; }
+    else
+        echo "Installing AWS CLI"
+        sudo yum install -y unzip || { echo "Failed to install unzip"; exit 1; }
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" || { echo "Failed to download AWS CLI"; exit 1; }
+        unzip awscliv2.zip || { echo "Failed to unzip AWS CLI"; exit 1; }
+        sudo ./aws/install || { echo "Failed to install AWS CLI"; exit 1; }
+        echo "Cleaning up AWS CLI installation files"
+        rm -rf awscliv2.zip aws
+    fi
 EOF
 echo "SSH connection complete. Docker and AWS CLI setup finished."
 
@@ -72,20 +79,23 @@ $SSH_CMD << EOF
     aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
     aws configure set region ${AWS_REGION}
 
+    # Check if the container exists
+    if [ \$(docker ps -a -q --filter name=${CONTAINER_NAME}) ]; then
+        echo "Stopping and removing the existing container: ${CONTAINER_NAME}"
+        docker stop ${CONTAINER_NAME} || true
+        docker rm ${CONTAINER_NAME} || true
+    else
+        echo "No existing container named ${CONTAINER_NAME} found"
+    fi
+
     echo "Logging in to AWS ECR"
     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com || { echo "Failed to login to AWS ECR"; exit 1; }
 
     echo "Pulling Docker image from ECR"
     docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
 
-    echo "Stopping existing container if running"
-    docker stop nimbus-bot || true
-
-    echo "Removing existing container if present"
-    docker rm nimbus-bot || true
-
     echo "Running the new Docker container"
-    docker run -d --name nimbus-bot -p 80:8080 \
+    docker run -d --name ${CONTAINER_NAME} -p 80:8080 \
       -e DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} \
       -e DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID} \
       -e REPO_TOKEN=${REPO_TOKEN} \
