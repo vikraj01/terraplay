@@ -12,6 +12,7 @@ var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
 	"!list-sessions": handleListSessionCommand,
 	"!list-games":    handleListGamesCommand,
 	"!stop":          handleStopCommand,
+	"!restart":       handleRestartCommand,
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
