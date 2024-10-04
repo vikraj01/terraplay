@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/bwmarrin/discordgo"
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 	"golang.org/x/crypto/ssh"
