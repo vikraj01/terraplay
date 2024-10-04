@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -116,26 +117,30 @@ func GetPublicIPByInstanceID(instanceID, awsRegion string) (string, error) {
 
 	svc := ec2.New(sess)
 
-	input := &ec2.DescribeInstancesInput{
-		InstanceIds: []*string{
-			aws.String(instanceID),
-		},
+	// Retry logic for fetching the public IP
+	for retries := 0; retries < 24; retries++ { // Retry for up to 2 minutes (24 * 5 seconds = 120 seconds)
+		input := &ec2.DescribeInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		result, err := svc.DescribeInstances(input)
+		if err != nil {
+			return "", fmt.Errorf("failed to describe EC2 instance: %v", err)
+		}
+
+		if len(result.Reservations) > 0 && len(result.Reservations[0].Instances) > 0 {
+			instance := result.Reservations[0].Instances[0]
+			if instance.PublicIpAddress != nil {
+				log.Printf("Found public IP: %s for instance ID: %s", *instance.PublicIpAddress, instanceID)
+				return *instance.PublicIpAddress, nil
+			}
+		}
+
+		log.Printf("Public IP not yet assigned for instance ID: %s, retrying... (%d/24)", instanceID, retries+1)
+		time.Sleep(5 * time.Second) // Wait 5 seconds before retrying
 	}
 
-	result, err := svc.DescribeInstances(input)
-	if err != nil {
-		return "", fmt.Errorf("failed to describe EC2 instance: %v", err)
-	}
-
-	if len(result.Reservations) == 0 || len(result.Reservations[0].Instances) == 0 {
-		return "", fmt.Errorf("no instance found with ID: %s", instanceID)
-	}
-
-	instance := result.Reservations[0].Instances[0]
-	if instance.PublicIpAddress == nil {
-		return "", fmt.Errorf("instance with ID %s does not have a public IP address", instanceID)
-	}
-
-	log.Printf("Found public IP: %s for instance ID: %s", *instance.PublicIpAddress, instanceID)
-	return *instance.PublicIpAddress, nil
+	return "", fmt.Errorf("public IP not assigned for instance ID %s after 2 minutes", instanceID)
 }
