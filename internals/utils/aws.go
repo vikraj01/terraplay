@@ -117,8 +117,7 @@ func GetPublicIPByInstanceID(instanceID, awsRegion string) (string, error) {
 
 	svc := ec2.New(sess)
 
-	// Retry logic for fetching the public IP
-	for retries := 0; retries < 24; retries++ { // Retry for up to 2 minutes (24 * 5 seconds = 120 seconds)
+	for retries := 0; retries < 24; retries++ { 
 		input := &ec2.DescribeInstancesInput{
 			InstanceIds: []*string{
 				aws.String(instanceID),
@@ -139,8 +138,43 @@ func GetPublicIPByInstanceID(instanceID, awsRegion string) (string, error) {
 		}
 
 		log.Printf("Public IP not yet assigned for instance ID: %s, retrying... (%d/24)", instanceID, retries+1)
-		time.Sleep(5 * time.Second) // Wait 5 seconds before retrying
+		time.Sleep(5 * time.Second) 
 	}
 
 	return "", fmt.Errorf("public IP not assigned for instance ID %s after 2 minutes", instanceID)
 }
+
+
+func WaitForInstanceRunning(instanceID, region string) error {
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	}))
+	ec2Svc := ec2.New(sess)
+
+	for retries := 0; retries < 12; retries++ {
+		input := &ec2.DescribeInstancesInput{
+			InstanceIds: []*string{aws.String(instanceID)},
+		}
+
+		result, err := ec2Svc.DescribeInstances(input)
+		if err != nil {
+			return fmt.Errorf("error describing EC2 instance: %v", err)
+		}
+
+		for _, reservation := range result.Reservations {
+			for _, instance := range reservation.Instances {
+				if *instance.InstanceId == instanceID && *instance.State.Name == "running" {
+					log.Printf("Instance %s is in running state", instanceID)
+					return nil
+				}
+			}
+		}
+
+		log.Printf("Instance %s not yet in running state, retrying (%d/12)", instanceID, retries+1)
+		time.Sleep(10 * time.Second)
+	}
+
+	return fmt.Errorf("instance %s did not reach running state in time", instanceID)
+}
+
+
