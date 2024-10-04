@@ -84,7 +84,7 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 
 func (svc *DynamoDBService) GetActiveSessionsForUser(userID string, status string) ([]models.Session, error) {
 	table := os.Getenv("DYNAMO_TABLE")
-	
+
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String(table),
 		IndexName:              aws.String("user_id-index"),
@@ -162,11 +162,16 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 	return nil
 }
 
+type Details struct {
+	Workspace string `json:"workspace"`
+	UserId    string `json:"user_id"`
+	GameName  string `json:"game_name"`
+	ServerIP  string `json:"server_ip"`
+}
 
-func (svc *DynamoDBService) GetWorkspaceBySessionID(sessionID string) (string, error) {
+func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, error) {
 	table := os.Getenv("DYNAMO_TABLE")
 
-	// Define the query input to fetch the session based on the session_id
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String(table),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -174,30 +179,25 @@ func (svc *DynamoDBService) GetWorkspaceBySessionID(sessionID string) (string, e
 				S: aws.String(sessionID),
 			},
 		},
-		ProjectionExpression: aws.String("workspace"), // Only return the workspace field
+		ProjectionExpression: aws.String("workspace, user_id, game_name, server_ip"),
 	}
 
-	// Perform the GetItem query
 	result, err := svc.Client.GetItem(input)
 	if err != nil {
-		log.Printf("Failed to get workspace for session ID %s: %v", sessionID, err)
-		return "", err
+		log.Printf("Failed to get details for session ID %s: %v", sessionID, err)
+		return Details{}, err
 	}
 
-	// Check if the item was found
 	if result.Item == nil {
-		return "", fmt.Errorf("no session found with session_id: %s", sessionID)
+		return Details{}, fmt.Errorf("no session found with session_id: %s", sessionID)
 	}
 
-	// Unmarshal the result to extract the workspace value
-	var workspace struct {
-		Workspace string `json:"workspace"`
-	}
-	err = dynamodbattribute.UnmarshalMap(result.Item, &workspace)
+	var details Details
+	err = dynamodbattribute.UnmarshalMap(result.Item, &details)
 	if err != nil {
-		log.Printf("Failed to unmarshal workspace result: %v", err)
-		return "", err
+		log.Printf("Failed to unmarshal details result: %v", err)
+		return Details{}, err
 	}
 
-	return workspace.Workspace, nil
+	return details, nil
 }

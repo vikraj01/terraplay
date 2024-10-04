@@ -1,16 +1,16 @@
 package bot
 
 import (
-	"strings"
 	"github.com/bwmarrin/discordgo"
+	"strings"
 )
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
-	"!ping":         handlePingCommand,
-	"!create":       handleCreateCommand,
-	"!destroy":      handleDestroyCommand,
+	"!ping":          handlePingCommand,
+	"!create":        handleCreateCommand,
+	"!destroy":       handleDestroyCommand,
 	"!list-sessions": handleListSessionCommand,
-	"!list-games"  : handleListGamesCommand,
+	"!list-games":    handleListGamesCommand,
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -32,4 +32,3 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		handler(s, m)
 	}
 }
-
