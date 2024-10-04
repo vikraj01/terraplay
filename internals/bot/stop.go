@@ -114,7 +114,7 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, b
 	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	awsRegion := os.Getenv("AWS_REGION")
 
-	cmd := exec.Command("/bin/bash", "actions/backup.sh", backupFile, backupPath, s3Bucket, awsSecretKey, awsAccessKey, awsRegion)
+	cmd := exec.Command("/usr/bin/bash", "actions/backup.sh", backupFile, backupPath, s3Bucket, awsSecretKey, awsAccessKey, awsRegion)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
