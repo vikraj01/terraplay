@@ -25,9 +25,10 @@ func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	sessionId := args[2]
 
-	workspaceID, err := dynamodbService.GetWorkspaceBySessionID(sessionId)
+	details, err := dynamodbService.GetDetailsBySessionID(sessionId)
+	workspaceID := details.Workspace
 	if err != nil {
-		log.Printf("Error fetching workspace: %v", err)
+		log.Printf("Error fetching sessionId details: %v", err)
 		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not find workspace for the given session ID.")
 		return
 	}
