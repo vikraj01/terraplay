@@ -50,10 +50,11 @@ func handleWorkflowRun(body []byte, folder, timestamp, requestID string) {
 	if payload.WorkflowRun.Status == "completed" && payload.WorkflowRun.Path == ".github/workflows/start.game.yml" {
 		log.Printf("Fetching logs for workflow run: %d", payload.WorkflowRun.ID)
 		patterns := map[string]*regexp.Regexp{
-			"game":      regexp.MustCompile(`"game":\s*"(.+?)"`),
-			"run_id":    regexp.MustCompile(`"run_id":\s*"(.+?)"`),
-			"user_id":   regexp.MustCompile(`"user_id":\s*"(.+?)"`),
-			"server_ip": regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`),
+			"game":        regexp.MustCompile(`"game":\s*"(.+?)"`),
+			"run_id":      regexp.MustCompile(`"run_id":\s*"(.+?)"`),
+			"user_id":     regexp.MustCompile(`"user_id":\s*"(.+?)"`),
+			"server_ip":   regexp.MustCompile(`server_ip\s*[=:]\s*"(.+?)"`),
+			"instance_id": regexp.MustCompile(`server_id\s*[=:]\s*"(.+?)"`),
 		}
 		err := fetchJobLogs(payload.WorkflowRun.LogsURL, folder, timestamp, requestID, payload, patterns, handleStartAction)
 
@@ -134,6 +135,7 @@ func handleStartAction(values map[string]string, payload WorkflowRunPayload, dyn
 	game := values["game"]
 	serverIP := values["server_ip"]
 	runID := values["run_id"]
+	instanceId := values["server_id"]
 
 	if userID == "" || game == "" || serverIP == "" || runID == "" {
 		errorMessage := fmt.Sprintf("Missing values in logs: game=%s, user_id=%s, server_ip=%s, run_id=%s", game, userID, serverIP, runID)
@@ -148,7 +150,7 @@ func handleStartAction(values map[string]string, payload WorkflowRunPayload, dyn
 		return fmt.Errorf("DynamoDBService is not initialized")
 	}
 
-	dynamoService.UpdateSessionStatusAndIP(runID, "running", serverIP)
+	dynamoService.UpdateSessionStatusAndIP(runID, "running", serverIP, instanceId)
 
 	cleanupExtractedFiles(folder)
 	return nil
@@ -171,7 +173,7 @@ func handleStopAction(values map[string]string, payload WorkflowRunPayload, dyna
 		return fmt.Errorf("DynamoDBService is not initialized")
 	}
 
-	dynamoService.UpdateSessionStatusAndIP(RunID, "terminated", "")
+	dynamoService.UpdateSessionStatusAndIP(RunID, "terminated", "", "")
 	cleanupExtractedFiles(folder)
 	return nil
 }
