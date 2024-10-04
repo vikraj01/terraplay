@@ -89,6 +89,7 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		WorkSpace: workspace,
+		InstanceId: "",
 	}
 
 	err = dynamoService.SaveSession(sessionModel)

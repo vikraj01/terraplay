@@ -34,6 +34,12 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if details.InstanceId == "" {
+		log.Println("⚠️ Error: Instance ID is missing in session details.")
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Instance ID is missing in the session data.")
+		return
+	}
+
 	sshKeyBase64 := os.Getenv("EC2_SSH_KEY_BASE64")
 	if sshKeyBase64 == "" {
 		log.Println("⚠️ Error: EC2_SSH_KEY_BASE64 is not set")
@@ -48,8 +54,23 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	err = utils.StartEC2Instance(details.InstanceId, os.Getenv("AWS_REGION"))
+	if err != nil {
+		log.Printf("Error starting EC2 instance: %v", err)
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error starting EC2 instance.")
+		return
+	}
+
+	awsRegion := os.Getenv("AWS_REGION")
+	newServerIP, err := utils.GetPublicIPByInstanceID(details.InstanceId, awsRegion)
+	if err != nil {
+		log.Printf("Error retrieving new server IP: %v", err)
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error retrieving new server IP.")
+		return
+	}
+
 	sshConfig := utils.SSHConfig{
-		Host:       details.ServerIP,
+		Host:       newServerIP,
 		Port:       "22",
 		User:       "ec2-user",
 		PrivateKey: privateKey,
@@ -59,16 +80,22 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	backupPath := "/opt/minetest/data"
 	s3Bucket := "global-bucket-893606"
 
-	err = RestoreAndRestartEC2(sshConfig, backupPath, s3Bucket, backupFile, details.ServerIP)
+	err = RestoreAndRestartEC2(sshConfig, backupPath, s3Bucket, backupFile, newServerIP)
 	if err != nil {
 		log.Printf("Error restarting and restoring EC2: %v", err)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: %v", err))
 		return
 	}
 
+	err = dynamodbService.UpdateSessionStatusAndIP(sessionId, "running", newServerIP)
+	if err != nil {
+		log.Printf("Error updating session with new IP: %v", err)
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error updating session with new IP.")
+		return
+	}
+
 	message := fmt.Sprintf(
-		"EC2 instance with IP `%s` has been restarted and data restored. Workspace: `%s`", details.ServerIP, details.Workspace)
-	dynamodbService.UpdateSessionStatusAndIP(sessionId, "running", details.ServerIP)
+		"EC2 instance with IP `%s` has been restarted and data restored. Workspace: `%s`", newServerIP, details.Workspace)
 	s.ChannelMessageSend(m.ChannelID, message)
 }
 
@@ -78,16 +105,6 @@ func RestoreAndRestartEC2(sshConfig utils.SSHConfig, backupPath, s3Bucket, backu
 		return fmt.Errorf("error connecting to EC2 via SSH: %v", err)
 	}
 	defer client.Close()
-
-	instanceID, err := utils.GetInstanceIDByPublicIP(publicIP)
-	if err != nil {
-		return fmt.Errorf("error retrieving instance ID: %v", err)
-	}
-
-	err = utils.StartEC2Instance(instanceID, os.Getenv("AWS_REGION"))
-	if err != nil {
-		return fmt.Errorf("error starting EC2 instance: %v", err)
-	}
 
 	scriptContent := `
 		#!/bin/bash

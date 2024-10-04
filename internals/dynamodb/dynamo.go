@@ -33,7 +33,6 @@ func InitializeDynamoDB() (*DynamoDBService, error) {
 	}
 
 	dynamoClient := dynamodb.New(sess)
-
 	return &DynamoDBService{Client: dynamoClient}, nil
 }
 
@@ -68,6 +67,9 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 			},
 			"server_ip": {
 				S: aws.String(sessModel.ServerIP),
+			},
+			"instance_id": {
+				S: aws.String(sessModel.InstanceId),
 			},
 		},
 	}
@@ -163,10 +165,11 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 }
 
 type Details struct {
-	Workspace string `json:"workspace"`
-	UserId    string `json:"user_id"`
-	GameName  string `json:"game_name"`
-	ServerIP  string `json:"server_ip"`
+	Workspace  string `json:"workspace"`
+	UserId     string `json:"user_id"`
+	GameName   string `json:"game_name"`
+	ServerIP   string `json:"server_ip"`
+	InstanceId string `json:"instance_id"`
 }
 
 func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, error) {
@@ -179,7 +182,7 @@ func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, er
 				S: aws.String(sessionID),
 			},
 		},
-		ProjectionExpression: aws.String("workspace, user_id, game_name, server_ip"),
+		ProjectionExpression: aws.String("workspace, user_id, game_name, server_ip, instance_id"), // Include instance_id
 	}
 
 	result, err := svc.Client.GetItem(input)
@@ -200,4 +203,48 @@ func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, er
 	}
 
 	return details, nil
+}
+
+func (svc *DynamoDBService) UpdateSessionStatusIPAndInstance(sessionID, status, serverIP, instanceID string) error {
+	table := os.Getenv("DYNAMO_TABLE")
+
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(table),
+		Key: map[string]*dynamodb.AttributeValue{
+			"session_id": {
+				S: aws.String(sessionID),
+			},
+		},
+		UpdateExpression: aws.String("SET #status = :status, #server_ip = :server_ip, #instance_id = :instance_id, #updated_at = :updated_at"),
+		ExpressionAttributeNames: map[string]*string{
+			"#status":     aws.String("status"),
+			"#server_ip":  aws.String("server_ip"),
+			"#instance_id": aws.String("instance_id"),
+			"#updated_at": aws.String("updated_at"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":status": {
+				S: aws.String(status),
+			},
+			":server_ip": {
+				S: aws.String(serverIP),
+			},
+			":instance_id": {
+				S: aws.String(instanceID),
+			},
+			":updated_at": {
+				S: aws.String(time.Now().Format(time.RFC3339)),
+			},
+		},
+		ReturnValues: aws.String("UPDATED_NEW"),
+	}
+
+	result, err := svc.Client.UpdateItem(input)
+	if err != nil {
+		log.Printf("Failed to update session: %v", err)
+		return err
+	}
+
+	log.Printf("Session updated successfully: %v", result.Attributes)
+	return nil
 }
