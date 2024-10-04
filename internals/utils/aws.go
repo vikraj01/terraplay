@@ -105,3 +105,37 @@ func StartEC2Instance(instanceID, region string) error {
 	log.Printf("Successfully started EC2 instance: %s", instanceID)
 	return nil
 }
+
+func GetPublicIPByInstanceID(instanceID, awsRegion string) (string, error) {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(awsRegion),
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to create AWS session: %v", err)
+	}
+
+	svc := ec2.New(sess)
+
+	input := &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceID),
+		},
+	}
+
+	result, err := svc.DescribeInstances(input)
+	if err != nil {
+		return "", fmt.Errorf("failed to describe EC2 instance: %v", err)
+	}
+
+	if len(result.Reservations) == 0 || len(result.Reservations[0].Instances) == 0 {
+		return "", fmt.Errorf("no instance found with ID: %s", instanceID)
+	}
+
+	instance := result.Reservations[0].Instances[0]
+	if instance.PublicIpAddress == nil {
+		return "", fmt.Errorf("instance with ID %s does not have a public IP address", instanceID)
+	}
+
+	log.Printf("Found public IP: %s for instance ID: %s", *instance.PublicIpAddress, instanceID)
+	return *instance.PublicIpAddress, nil
+}
