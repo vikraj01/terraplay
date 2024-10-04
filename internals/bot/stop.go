@@ -9,7 +9,7 @@ import (
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 )
 
-func handleStopCommand(s *discordgo.Session, m *discordgo.Message) () {
+func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)
@@ -30,5 +30,8 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.Message) () {
 		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not find workspace for the given session ID.")
 		return
 	}
-	fmt.Println(details)
+	message := fmt.Sprintf(
+		"For the server with IP `%s` have been stopped"+
+			"For the workspace `%s`", details.ServerIP, details.Workspace)
+	s.ChannelMessageSend(m.ChannelID, message)
 }
