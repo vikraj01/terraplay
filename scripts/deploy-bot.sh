@@ -86,6 +86,11 @@ $SSH_CMD << EOF
     echo "Pulling Docker image from ECR"
     docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
 
+    echo "Writing SSH Key to base64"
+    echo "${EC2_SSH_KEY}" | base64 > ec2_key.pem.b64
+
+
+
     echo "Running the new Docker container"
     docker run -d --name ${CONTAINER_NAME} -p 8080:8080 \
       -e DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} \
@@ -97,7 +102,7 @@ $SSH_CMD << EOF
       -e AWS_REGION=${AWS_REGION} \
       -e DYNAMO_TABLE=${DYNAMO_TABLE} \
       -e APP_ENV=${APP_ENV} \
-      -e EC2_SSH_KEY=${EC2_SSH_KEY} \
+      -e EC2_SSH_KEY_BASE64=$(cat ec2_key.pem.b64) \
       ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
 
