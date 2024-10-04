@@ -69,6 +69,9 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 			"server_ip": {
 				S: aws.String(sessModel.ServerIP),
 			},
+			"instance_id":{
+				S: aws.String(sessModel.InstanceId),
+			},
 		},
 	}
 
