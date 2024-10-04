@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -58,14 +59,15 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	sshConfig := SSHConfig{
 		Host:       details.ServerIP,
 		Port:       "22",
-		User:       "ec2-user",                              // Change as necessary
+		User:       "ec2-user", // Change as necessary
 		PrivateKey: privateKey, // Load from environment or securely
 	}
 
-	backupPath := "/opt/minetest/data" // Adjust the path you need to backup
+	backupFile := "/tmp/backup.tar.gz"
+	backupPath := "/opt/minetest/data"
 	s3Bucket := "global-bucket-893606"
 
-	err = BackupAndStopEC2(sshConfig, backupPath, s3Bucket, details.ServerIP)
+	err = BackupAndStopEC2(sshConfig, backupPath, s3Bucket, backupFile, details.ServerIP)
 	if err != nil {
 		log.Printf("Error executing backup and stop: %v", err)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: %v", err))
@@ -102,31 +104,26 @@ func connectToEC2ViaSSH(config SSHConfig) (*ssh.Client, error) {
 	return client, nil
 }
 
-func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, publicIP string) error {
+func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, backupFile string, publicIP string) error {
 	client, err := connectToEC2ViaSSH(sshConfig)
 	if err != nil {
 		return fmt.Errorf("error connecting to EC2 via SSH: %v", err)
 	}
 	defer client.Close()
 
-	backupFile := "/tmp/backup.tar.gz"
 
-	command := fmt.Sprintf("tar -czf %s -C %s .", backupFile, backupPath)
-	log.Printf("Running command on EC2: %s", command)
+	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	awsRegion := os.Getenv("AWS_REGION")
 
-	if err := runCommandOnEC2(client, command); err != nil {
-		return fmt.Errorf("error creating backup archive: %v", err)
+	cmd := exec.Command("/bin/bash", "actions/backup.sh", backupFile, backupPath, s3Bucket, awsSecretKey, awsAccessKey, awsRegion)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error running backup script: %v, output: %s", err, string(output))
 	}
-
-	checkCommand := fmt.Sprintf("ls -lh %s", backupFile)
-	if err := runCommandOnEC2(client, checkCommand); err != nil {
-		return fmt.Errorf("backup file was not created: %v", err)
-	}
-
-	if err := uploadFileToS3(backupFile, s3Bucket); err != nil {
-		return fmt.Errorf("error uploading backup to S3: %v", err)
-	}
-
+	log.Printf("Backup script output: %s", string(output))
+	
 	instanceID, err := getInstanceIDByPublicIP(publicIP)
 	if err != nil {
 		return fmt.Errorf("error retrieving instance ID: %v", err)
@@ -139,48 +136,6 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, p
 	return nil
 }
 
-
-func runCommandOnEC2(client *ssh.Client, command string) error {
-	session, err := client.NewSession()
-	if err != nil {
-		return fmt.Errorf("error creating SSH session: %v", err)
-	}
-	defer session.Close()
-
-	var stdout, stderr bytes.Buffer
-	session.Stdout = &stdout
-	session.Stderr = &stderr
-
-	if err := session.Run(command); err != nil {
-		return fmt.Errorf("error running command: %v (stderr: %s)", err, stderr.String())
-	}
-
-	log.Printf("Command output: %s", stdout.String())
-	return nil
-}
-
-func uploadFileToS3(filePath string, bucket string) error {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return fmt.Errorf("error opening file for upload: %v", err)
-	}
-	defer file.Close()
-
-	sess := session.Must(session.NewSession())
-	uploader := s3manager.NewUploader(sess)
-
-	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String("backup.tar.gz"),
-		Body:   file,
-	})
-	if err != nil {
-		return fmt.Errorf("error uploading file to S3: %v", err)
-	}
-
-	log.Printf("File successfully uploaded to S3 bucket %s", bucket)
-	return nil
-}
 
 func getInstanceIDByPublicIP(publicIP string) (string, error) {
 	sess := session.Must(session.NewSession())
@@ -226,4 +181,73 @@ func stopEC2Instance(instanceID string) error {
 	return nil
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // halted, terminated, running, pending
+
+
+
+
+
+
+
+
+
+/*
+func runCommandOnEC2(client *ssh.Client, command string) error {
+	session, err := client.NewSession()
+	if err != nil {
+		return fmt.Errorf("error creating SSH session: %v", err)
+	}
+	defer session.Close()
+
+	var stdout, stderr bytes.Buffer
+	session.Stdout = &stdout
+	session.Stderr = &stderr
+
+	if err := session.Run(command); err != nil {
+		return fmt.Errorf("error running command: %v (stderr: %s)", err, stderr.String())
+	}
+
+	log.Printf("Command output: %s", stdout.String())
+	return nil
+}
+
+func uploadFileToS3(filePath string, bucket string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("error opening file for upload: %v", err)
+	}
+	defer file.Close()
+
+	sess := session.Must(session.NewSession())
+	uploader := s3manager.NewUploader(sess)
+
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String("backup.tar.gz"),
+		Body:   file,
+	})
+	if err != nil {
+		return fmt.Errorf("error uploading file to S3: %v", err)
+	}
+
+	log.Printf("File successfully uploaded to S3 bucket %s", bucket)
+	return nil
+}
+
+*/
