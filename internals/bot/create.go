@@ -80,15 +80,16 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	workspace := fmt.Sprintf("%s@%s", uniqueId, gameName)
 	sessionModel := models.Session{
-		SessionId: runId,
-		UserId:    userID,
-		GameName:  gameName,
-		Status:    "pending",
-		StartTime: time.Now(),
-		ServerIP:  "",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		WorkSpace: workspace,
+		SessionId:  runId,
+		UserId:     userID,
+		GameName:   gameName,
+		Status:     "pending",
+		StartTime:  time.Now(),
+		ServerIP:   "",
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		WorkSpace:  workspace,
+		InstanceId: "",
 	}
 
 	err = dynamoService.SaveSession(sessionModel)
@@ -110,8 +111,9 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"Workspace   : %s\n"+
 			"Created At  : %s\n"+
 			"Status      : %s\n"+
+			"InstanceId  : %s\n"+
 			"```",
-		userID, GlobalName, gameName, sessionModel.SessionId, runId, workspace, sessionModel.CreatedAt.Format(time.RFC822), sessionModel.Status)
+		userID, GlobalName, gameName, sessionModel.SessionId, runId, workspace, sessionModel.CreatedAt.Format(time.RFC822), sessionModel.Status, sessionModel.InstanceId)
 
 	s.ChannelMessageSend(m.ChannelID, message)
 	s.ChannelMessageSend(m.ChannelID, "Game session created! GitHub Action triggered for game: "+gameName)

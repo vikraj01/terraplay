@@ -4,6 +4,7 @@ import "time"
 
 type Session struct {
 	SessionId  string    `json:"session_id"`
+	InstanceId string 	  `json:"instance_id"`
 	UserId     string    `json:"user_id"`
 	GameName   string    `json:"game_name"`
 	Status     string    `json:"status"`

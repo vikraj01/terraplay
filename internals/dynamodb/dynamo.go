@@ -122,7 +122,7 @@ func (svc *DynamoDBService) GetActiveSessionsForUser(userID string, status strin
 	return sessions, nil
 }
 
-func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP string) error {
+func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP string, instanceId string) error {
 	table := os.Getenv("DYNAMO_TABLE")
 
 	input := &dynamodb.UpdateItemInput{
@@ -134,9 +134,10 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 		},
 		UpdateExpression: aws.String("SET #status = :status, #server_ip = :server_ip, #updated_at = :updated_at"),
 		ExpressionAttributeNames: map[string]*string{
-			"#status":     aws.String("status"),
-			"#server_ip":  aws.String("server_ip"),
-			"#updated_at": aws.String("updated_at"),
+			"#status":      aws.String("status"),
+			"#server_ip":   aws.String("server_ip"),
+			"#updated_at":  aws.String("updated_at"),
+			"#instance_id": aws.String("instance_id"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":status": {
@@ -147,6 +148,9 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 			},
 			":updated_at": {
 				S: aws.String(time.Now().Format(time.RFC3339)),
+			},
+			":instance_id": {
+				S: aws.String(instanceId),
 			},
 		},
 		ReturnValues: aws.String("UPDATED_NEW"),
@@ -163,10 +167,12 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 }
 
 type Details struct {
-	Workspace string `json:"workspace"`
-	UserId    string `json:"user_id"`
-	GameName  string `json:"game_name"`
-	ServerIP  string `json:"server_ip"`
+	Workspace  string `json:"workspace"`
+	UserId     string `json:"user_id"`
+	GameName   string `json:"game_name"`
+	ServerIP   string `json:"server_ip"`
+	InstanceId string `json:"instance_id"`
+	Status     string `json:"status"`
 }
 
 func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, error) {
