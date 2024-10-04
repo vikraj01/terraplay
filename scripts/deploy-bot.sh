@@ -97,6 +97,7 @@ $SSH_CMD << EOF
       -e AWS_REGION=${AWS_REGION} \
       -e DYNAMO_TABLE=${DYNAMO_TABLE} \
       -e APP_ENV=${APP_ENV} \
+      -e EC2_SSH_KEY=${EC2_SSH_KEY} \
       ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
 
