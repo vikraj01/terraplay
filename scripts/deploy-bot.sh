@@ -28,6 +28,9 @@ CONTAINER_NAME="nimbus-bot"
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
 
+# Create base64 encoded SSH key on the local machine
+echo "${EC2_SSH_KEY}" | base64 > ec2_key.pem.b64
+
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker and AWS CLI on EC2"
@@ -80,17 +83,14 @@ $SSH_CMD << EOF
         echo "No existing container named ${CONTAINER_NAME} found"
     fi
 
+    echo "Removing all unused images"
+    docker image prune -af || { echo "Failed to remove unused Docker images"; exit 1; }
+
     echo "Logging in to AWS ECR"
     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com || { echo "Failed to login to AWS ECR"; exit 1; }
 
-    echo "Removing all unused images"
-    docker image prune -af || { echo "Failed to remove unused Docker images"; exit 1; }
-    
     echo "Pulling Docker image from ECR"
     docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to pull Docker image"; exit 1; }
-
-    echo "Writing SSH Key to base64"
-    echo "${EC2_SSH_KEY}" | base64 > ec2_key.pem.b64
 
     echo "Running the new Docker container"
     docker run -d --name ${CONTAINER_NAME} -p 8080:8080 \
@@ -108,7 +108,6 @@ $SSH_CMD << EOF
 EOF
 
 rm ec2_key.pem
-
-echo "$(cat ec2_key.pem.b64)"
+rm ec2_key.pem.b64
 
 echo "Deployment complete!"
