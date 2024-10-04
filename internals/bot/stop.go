@@ -27,7 +27,7 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	details, err := dynamodbService.GetDetailsBySessionID(sessionId)
 	if err != nil {
 		log.Printf("Error fetching sessionId details: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not find workspace for the given session ID.")
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: Could not find workspace for the given session ID: %v", err))
 		return
 	}
 	message := fmt.Sprintf(
