@@ -1,11 +1,11 @@
 package bot
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -109,19 +109,59 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, b
 	}
 	defer client.Close()
 
+	testCommand := "echo 'SSH connection successful' > /tmp/test_ssh_connection.txt"
+	err = runCommandOnEC2(client, testCommand)
+	if err != nil {
+		return fmt.Errorf("error running test command on EC2: %v", err)
+	}
+	log.Println("Test command executed successfully: /tmp/test_ssh_connection.txt created")
 
 	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
 	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	awsRegion := os.Getenv("AWS_REGION")
 
-	cmd := exec.Command("/usr/bin/bash", "actions/backup.sh", backupFile, backupPath, s3Bucket, awsSecretKey, awsAccessKey, awsRegion)
+	scriptContent := `
+		#!/bin/bash
+		BACKUP_FILE=$1
+		BACKUP_PATH=$2
+		S3_BUCKET=$3
+		AWS_SECRET_ACCESS_KEY=$4
+		AWS_ACCESS_KEY_ID=$5
+		AWS_REGION=$6
 
-	output, err := cmd.CombinedOutput()
+		if ! command -v aws &> /dev/null; then
+			echo "AWS CLI not found, installing..."
+			sudo yum install -y awscli
+		fi
+
+		export AWS_ACCESS_KEY_ID=$5
+		export AWS_SECRET_ACCESS_KEY=$4
+		export AWS_DEFAULT_REGION=$6
+
+		echo "Creating backup..."
+		tar -czf $BACKUP_FILE -C $BACKUP_PATH .
+
+		echo "Uploading backup to S3 bucket $S3_BUCKET..."
+		aws s3 cp $BACKUP_FILE s3://$S3_BUCKET/backup.tar.gz --region $AWS_REGION
+
+		echo "Cleaning up the backup file..."
+		rm -f $BACKUP_FILE
+	`
+
+	createScriptCommand := fmt.Sprintf("echo '%s' > /home/ec2-user/backup.sh && chmod +x /home/ec2-user/backup.sh", scriptContent)
+	err = runCommandOnEC2(client, createScriptCommand)
 	if err != nil {
-		return fmt.Errorf("error running backup script: %v, output: %s", err, string(output))
+		return fmt.Errorf("error creating backup.sh script on EC2: %v", err)
 	}
-	log.Printf("Backup script output: %s", string(output))
-	
+	log.Println("Backup script created successfully on EC2 instance.")
+
+	backupCommand := fmt.Sprintf("/bin/bash /home/ec2-user/backup.sh %s %s %s %s %s %s", backupFile, backupPath, s3Bucket, awsSecretKey, awsAccessKey, awsRegion)
+	err = runCommandOnEC2(client, backupCommand)
+	if err != nil {
+		return fmt.Errorf("error running backup script on EC2: %v", err)
+	}
+	log.Println("Backup and upload completed successfully on EC2 instance.")
+
 	instanceID, err := getInstanceIDByPublicIP(publicIP)
 	if err != nil {
 		return fmt.Errorf("error retrieving instance ID: %v", err)
@@ -133,7 +173,6 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, b
 
 	return nil
 }
-
 
 func getInstanceIDByPublicIP(publicIP string) (string, error) {
 	sess := session.Must(session.NewSession())
@@ -179,33 +218,8 @@ func stopEC2Instance(instanceID string) error {
 	return nil
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // halted, terminated, running, pending
 
-
-
-
-
-
-
-
-
-/*
 func runCommandOnEC2(client *ssh.Client, command string) error {
 	session, err := client.NewSession()
 	if err != nil {
@@ -224,6 +238,8 @@ func runCommandOnEC2(client *ssh.Client, command string) error {
 	log.Printf("Command output: %s", stdout.String())
 	return nil
 }
+
+/*
 
 func uploadFileToS3(filePath string, bucket string) error {
 	file, err := os.Open(filePath)
