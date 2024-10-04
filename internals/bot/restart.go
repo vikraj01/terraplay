@@ -80,7 +80,7 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	backupPath := "/opt/minetest/data"
 	s3Bucket := "global-bucket-893606"
 
-	err = RestoreAndRestartEC2(sshConfig, backupPath, s3Bucket, backupFile, newServerIP)
+	err = RestoreAndRestartEC2(sshConfig, backupPath, s3Bucket, backupFile, newServerIP, details.InstanceId)
 	if err != nil {
 		log.Printf("Error restarting and restoring EC2: %v", err)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: %v", err))
@@ -99,8 +99,15 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.ChannelMessageSend(m.ChannelID, message)
 }
 
-func RestoreAndRestartEC2(sshConfig utils.SSHConfig, backupPath, s3Bucket, backupFile, publicIP string) error {
-	client, err := utils.ConnectToEC2ViaSSH(sshConfig)
+func RestoreAndRestartEC2(sshConfig utils.SSHConfig, backupPath, s3Bucket, backupFile, publicIP string, instanceID string) error {
+	awsRegion := os.Getenv("AWS_REGION")
+
+	err := utils.WaitForInstanceRunning(instanceID, awsRegion)
+	if err != nil {
+		return fmt.Errorf("error waiting for instance to reach running state: %v", err)
+	}
+
+	client, err := utils.ConnectToEC2ViaSSHWithRetry(sshConfig)
 	if err != nil {
 		return fmt.Errorf("error connecting to EC2 via SSH: %v", err)
 	}
