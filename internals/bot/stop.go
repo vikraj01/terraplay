@@ -13,7 +13,7 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not initialize database. Please try again later.")
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not initialize the database. Please try again later.")
 		return
 	}
 
@@ -24,14 +24,22 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	sessionId := args[2]
+
 	details, err := dynamodbService.GetDetailsBySessionID(sessionId)
 	if err != nil {
 		log.Printf("Error fetching sessionId details: %v", err)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: Could not find workspace for the given session ID: %v", err))
 		return
 	}
+
+	if details.Status != "running" {
+		s.ChannelMessageSend(m.ChannelID, "🛑 Only sessions with `running` status can be stopped.")
+		return
+	}
+
 	message := fmt.Sprintf(
-		"For the server with IP `%s` have been stopped"+
-			"For the workspace `%s`", details.ServerIP, details.Workspace)
+		"🖥️ The server with IP `%s` has been stopped. 🗂️ Workspace: `%s`", details.ServerIP, details.Workspace)
 	s.ChannelMessageSend(m.ChannelID, message)
 }
+
+
