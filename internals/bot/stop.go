@@ -2,6 +2,7 @@ package bot
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -45,15 +46,23 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: Could not find workspace for the given session ID: %v", err))
 		return
 	}
+	sshKeyBase64 := os.Getenv("EC2_SSH_KEY_BASE64")
+	if sshKeyBase64 == "" {
+		log.Fatal("EC2_SSH_KEY_BASE64 is not set")
+	}
 
+	privateKey, err := base64.StdEncoding.DecodeString(sshKeyBase64)
+	if err != nil {
+		log.Fatalf("Error decoding base64 private key: %v", err)
+	}
 	sshConfig := SSHConfig{
 		Host:       details.ServerIP,
 		Port:       "22",
-		User:       "ec2-user",                   // Change as necessary
-		PrivateKey: []byte(os.Getenv("EC2_SSH_KEY")), // Load from environment or securely
+		User:       "ec2-user",                              // Change as necessary
+		PrivateKey: privateKey, // Load from environment or securely
 	}
 
-	backupPath :="/opt/minetest/data"// Adjust the path you need to backup
+	backupPath := "/opt/minetest/data" // Adjust the path you need to backup
 	s3Bucket := "global-bucket-893606"
 
 	err = BackupAndStopEC2(sshConfig, backupPath, s3Bucket, details.ServerIP)
@@ -207,6 +216,5 @@ func stopEC2Instance(instanceID string) error {
 	log.Printf("Successfully stopped EC2 instance: %s", instanceID)
 	return nil
 }
-
 
 // halted, terminated, running, pending
