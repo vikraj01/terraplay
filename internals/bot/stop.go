@@ -110,9 +110,17 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, p
 	defer client.Close()
 
 	backupFile := "/tmp/backup.tar.gz"
+
 	command := fmt.Sprintf("tar -czf %s -C %s .", backupFile, backupPath)
+	log.Printf("Running command on EC2: %s", command)
+
 	if err := runCommandOnEC2(client, command); err != nil {
 		return fmt.Errorf("error creating backup archive: %v", err)
+	}
+
+	checkCommand := fmt.Sprintf("ls -lh %s", backupFile)
+	if err := runCommandOnEC2(client, checkCommand); err != nil {
+		return fmt.Errorf("backup file was not created: %v", err)
 	}
 
 	if err := uploadFileToS3(backupFile, s3Bucket); err != nil {
@@ -130,6 +138,7 @@ func BackupAndStopEC2(sshConfig SSHConfig, backupPath string, s3Bucket string, p
 
 	return nil
 }
+
 
 func runCommandOnEC2(client *ssh.Client, command string) error {
 	session, err := client.NewSession()
