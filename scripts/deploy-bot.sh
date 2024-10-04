@@ -28,8 +28,7 @@ CONTAINER_NAME="nimbus-bot"
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
 
-# Create base64 encoded SSH key on the local machine
-echo "${EC2_SSH_KEY}" | base64 > ec2_key.pem.b64
+echo "${EC2_SSH_KEY}" | base64 -w 0 > ec2_key.pem.b64
 
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 
