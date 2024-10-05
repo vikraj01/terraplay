@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	// First health check the global infrastructure
+	
 	go func(){
 		bot.StartBot()
 	}()
