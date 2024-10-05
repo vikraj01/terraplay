@@ -35,6 +35,6 @@ data "aws_ami" "ubuntu" {
 }
 
 
-data "aws_iam_role" "github-action-role" {
+data "aws_iam_role" "github_actions_role" {
   name = "GithubActionsRole"
 }
