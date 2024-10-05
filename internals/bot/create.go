@@ -111,8 +111,9 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"Workspace   : %s\n"+
 			"Created At  : %s\n"+
 			"Status      : %s\n"+
+			"InstanceId  : %s\n"+
 			"```",
-		userID, GlobalName, gameName, sessionModel.SessionId, runId, workspace, sessionModel.CreatedAt.Format(time.RFC822), sessionModel.Status)
+		userID, GlobalName, gameName, sessionModel.SessionId, runId, workspace, sessionModel.CreatedAt.Format(time.RFC822), sessionModel.Status, sessionModel.InstanceId)
 
 	s.ChannelMessageSend(m.ChannelID, message)
 	s.ChannelMessageSend(m.ChannelID, "Game session created! GitHub Action triggered for game: "+gameName)

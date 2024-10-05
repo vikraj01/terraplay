@@ -4,7 +4,7 @@ variable "region" {
 }
 
 variable "table_name" {
-  description = "The name of the DynamoDB table"
+  description = "The name of the DynamoDB table for storing Terraform state locks"
   type        = string
 }
 
@@ -37,19 +37,29 @@ variable "billing_mode" {
   default     = "PROVISIONED"
 }
 
-
 variable "project_name" {
-  description = "The name of the project or application this resource is associated with, used to group resources and facilitate resource management and cost allocation."
+  description = "The name of the project or application, used for resource grouping and identification"
   type        = string
 }
 
 variable "managed_by" {
-  description = "The team or individual responsible for managing this resource, ensuring accountability and maintenance oversight."
+  description = "The team or individual responsible for managing these resources"
   type        = string
   default     = "Terraform"
 }
 
-
 variable "instance_type" {
-  
+  description = "The type of EC2 instance to be used in the project (e.g., t2.micro, m5.large)"
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "account_id" {
+  description = "The AWS account ID where resources will be deployed"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "The GitHub repository (in the format 'owner/repo') that will use OIDC to assume the AWS IAM role"
+  type        = string
 }
