@@ -6,7 +6,7 @@ terraform {
       version = "~> 5.0"
     }
     null = {
-      source  = "hashicorp/null"
+      source = "hashicorp/null"
       version = "3.2.3"
     }
     archive = {
@@ -16,6 +16,10 @@ terraform {
   }
 
   backend "s3" {
+    bucket         = "terraplay-state-storagev1"
+    region         = "ap-south-1"
+    dynamodb_table = "terraform_state_lock"
+    key            = "terraform.tfstate"
   }
 }
 
