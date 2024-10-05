@@ -14,5 +14,6 @@ locals {
     Project   = var.project_name
     ManagedBy = var.managed_by
     WorkSpace = terraform.workspace
+    Keeper    = true
   }
 }

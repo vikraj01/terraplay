@@ -8,6 +8,11 @@ variable "table_name" {
   type        = string
 }
 
+variable "bucket_name" {
+  description = "The name of the Bucket for storing state"
+  type        = string
+}
+
 variable "hash_key" {
   description = "The partition key for the DynamoDB table"
   type        = string

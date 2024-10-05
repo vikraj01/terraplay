@@ -1,19 +1,12 @@
 # -------------------------
-# Random ID for S3 Bucket Prefix
-# -------------------------
-resource "random_id" "bucket_prefix" {
-  byte_length = 8
-}
-
-# -------------------------
 # Backend Storage Module for S3
 # -------------------------
 module "backend_storage" {
   source      = "../../modules/storage"
-  bucket_name = "${var.project_name}-backend-${random_id.bucket_prefix.hex}"
+  bucket_name = var.bucket_name
 
   tags = merge(local.storage_tags, {
-    Name      = "${var.project_name}-backend-${random_id.bucket_prefix.hex}",
+    Name      = var.bucket_name
     ManagedBy = var.managed_by
   })
 }
@@ -80,31 +73,31 @@ resource "aws_iam_role_policy" "github_actions_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "s3:ListBucket",
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject"
         ],
         Resource = [
-          "arn:aws:s3:::${module.backend_storage.bucket_name}",
-          "arn:aws:s3:::${module.backend_storage.bucket_name}/*"
+          "arn:aws:s3:::${var.bucket_name}",
+          "arn:aws:s3:::${var.bucket_name}/*"
         ]
       },
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:DeleteItem",
           "dynamodb:UpdateItem"
         ],
-        Resource = "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${module.terraform_state_lock.table_name}"
+        Resource = "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.table_name}"
       },
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability",
