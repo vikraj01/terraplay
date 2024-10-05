@@ -78,23 +78,33 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "s3:ListBucket",
           "s3:GetObject",
           "s3:PutObject",
-          "s3:DeleteObject"
+          "s3:DeleteObject",
+          "s3:CreateBucket",       # Allow bucket creation
+          "s3:DeleteBucket",       # Allow bucket deletion
+          "s3:PutBucketPolicy",    # Allow modifying bucket policy
+          "s3:PutBucketAcl"        # Allow setting bucket permissions
         ],
         Resource = [
           "arn:aws:s3:::${var.bucket_name}",
           "arn:aws:s3:::${var.bucket_name}/*"
         ]
       },
+      # DynamoDB Permissions
       {
         Effect = "Allow",
         Action = [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:DeleteItem",
-          "dynamodb:UpdateItem"
+          "dynamodb:UpdateItem",
+          "dynamodb:DescribeTable",  # Describe the table
+          "dynamodb:CreateTable",    # Create tables
+          "dynamodb:DeleteTable",    # Delete tables
+          "dynamodb:UpdateTable"     # Modify table configurations
         ],
-        Resource = "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.table_name}"
+        Resource = "arn:aws:dynamodb:${var.region}:${var.account_id}:table/*"
       },
+      # ECR Permissions
       {
         Effect = "Allow",
         Action = [
@@ -104,10 +114,68 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "ecr:PutImage",
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
+          "ecr:CompleteLayerUpload",
+          "ecr:CreateRepository",   # Allow repository creation
+          "ecr:DeleteRepository",   # Allow repository deletion
+          "ecr:SetRepositoryPolicy" # Set repository policy
         ],
         Resource = "arn:aws:ecr:${var.region}:${var.account_id}:repository/*"
+      },
+      # EC2 Permissions
+      {
+        Effect = "Allow",
+        Action = [
+          "ec2:RunInstances",        # Launch EC2 instances
+          "ec2:TerminateInstances",  # Terminate instances
+          "ec2:DescribeInstances",   # Describe running instances
+          "ec2:StartInstances",      # Start instances
+          "ec2:StopInstances",       # Stop instances
+          "ec2:RebootInstances",     # Reboot instances
+          "ec2:DescribeImages",      # Describe AMIs (for selecting the right AMI)
+          "ec2:DescribeSubnets",     # Get subnet details
+          "ec2:DescribeSecurityGroups", # Describe security groups
+          "ec2:DescribeAvailabilityZones", # Get availability zones
+          "ec2:CreateSecurityGroup", # Create security groups
+          "ec2:DeleteSecurityGroup", # Delete security groups
+          "ec2:CreateTags",          # Tag resources
+          "ec2:DeleteTags"           # Delete tags
+        ],
+        Resource = "*"
+      },
+      # IAM Permissions (for managing roles and policies)
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:GetRole",             # Get information about roles
+          "iam:PassRole",            # Pass role to other services (e.g., EC2)
+          "iam:CreateRole",          # Create IAM roles
+          "iam:DeleteRole",          # Delete IAM roles
+          "iam:UpdateRole",          # Update roles
+          "iam:AttachRolePolicy",    # Attach policies to roles
+          "iam:DetachRolePolicy",    # Detach policies from roles
+          "iam:CreatePolicy",        # Create new policies
+          "iam:DeletePolicy"         # Delete policies
+        ],
+        Resource = "arn:aws:iam::${var.account_id}:role/*"
+      },
+      # Secrets Manager Permissions
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue",  # Get the secret's value
+          "secretsmanager:DescribeSecret",  # Describe the secret
+          "secretsmanager:CreateSecret",    # Create new secrets
+          "secretsmanager:UpdateSecret",    # Update secrets
+          "secretsmanager:DeleteSecret"     # Delete secrets
+        ],
+        Resource = "arn:aws:secretsmanager:${var.region}:${var.account_id}:secret/*"
+      },
+      {
+        Effect = "Allow",
+        Action = "secretsmanager:ListSecrets", # List all secrets
+        Resource = "*"
       }
     ]
   })
 }
+
