@@ -34,6 +34,6 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-data "aws_iam_policy" "ecr_full_access" {
-  name = "AmazonEC2ContainerRegistryFullAccess"
+data "aws_iam_role" "github-action-role" {
+  name = "GithubActionsRole"
 }

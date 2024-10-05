@@ -1,0 +1,47 @@
+name: Global Infra Deployment Action
+on:
+    push:
+        branches:
+            - main
+permissions:
+    id-token: write
+    contents: read
+    pull-requests: write
+env:
+    TF_LOG: INFO
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash
+                working-directory: ./infra/admin/global
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            - name: Configure AWS credentials from AWS account
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE }}
+                aws-region: ${{ secrets.AWS_REGION }}
+                role-session-name: GitHub-OIDC-TERRAFORM
+      
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v2
+            
+            - name: Terraform init
+              id: init
+              env:
+                TF_BACKEND_STATE_STORAGE: ${{ secrets.TF_BACKEND_STATE_STORAGE }}
+                TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+                TF_BACKEND_LOCK_TABLE: ${{ secrets.TF_BACKEND_LOCK_TABLE }}
+              run: terraform init -backend-config="bucket=${TF_BACKEND_STATE_STORAGE}" -backend-config="key=${TF_BACKEND_KEY}" -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" -backend-config="region=${AWS_REGION}"
+
+            - name: Change To Terraform Control Workspaces
+              run: terraform workspace select ${{ secrets.GLOBAL_WORKSPACE_NAME}} || terraform workspace new ${{ secrets.GLOBAL_WORKSPACE_NAME }}
+
+            - name: Terraform Apply
+              if: github.ref == 'ref/heads/main' && github.event_name == 'push'
+              run: terraform apply -auto-approve
