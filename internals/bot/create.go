@@ -80,15 +80,15 @@ func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	workspace := fmt.Sprintf("%s@%s", uniqueId, gameName)
 	sessionModel := models.Session{
-		SessionId:  runId,
-		UserId:     userID,
-		GameName:   gameName,
-		Status:     "pending",
-		StartTime:  time.Now(),
-		ServerIP:   "",
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		WorkSpace:  workspace,
+		SessionId: runId,
+		UserId:    userID,
+		GameName:  gameName,
+		Status:    "pending",
+		StartTime: time.Now(),
+		ServerIP:  "",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		WorkSpace: workspace,
 		InstanceId: "",
 	}
 
