@@ -1,10 +1,10 @@
 data "terraform_remote_state" "global" {
   backend = "s3"
   config = {
-    bucket         = "terraplay-keeper-backend-da28ee014ea0433f"
-    region         = "ap-south-1"
-    dynamodb_table = "terraform-state-lock"
-    key            = "env:/global/terraform.tfstate"
+    bucket         = var.bucket
+    region         = var.region
+    dynamodb_table = var.dynamodb_table
+    key            = "env:/${var.global_workspace_name}/${var.key}"
   }
 }
 
@@ -13,6 +13,7 @@ locals {
   global_public_subnet_0 = try(data.terraform_remote_state.global.outputs.subnets["public_subnets"].subnet_id, null)
   global_security_group  = try(data.terraform_remote_state.global.outputs.security_group_ids[local.valid_game], null)
   ssh_key_name           = try(data.terraform_remote_state.global.outputs.aws_key_name, null)
+  
 }
 
 module "game_server" {

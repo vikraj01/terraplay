@@ -33,8 +33,3 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 }
-
-
-data "aws_iam_role" "github_actions_role" {
-  name = "GithubActionsRole"
-}

@@ -6,7 +6,7 @@ subnet_config = {
     public     = true
     cidr_block = "10.0.1.0/24"
     az         = "ap-south-1a"
-}
+  }
   private = {
     cidr_block = "10.0.2.0/24"
     az         = "ap-south-1b"
@@ -49,4 +49,4 @@ egress_rules = {
 
 security_group_description = "This firewall for terraplay game servers"
 create_firewall            = false
-key_pair_name= "terraplay-key-pair"
+key_pair_name              = "terraplay-key-pair"
