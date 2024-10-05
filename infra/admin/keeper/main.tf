@@ -74,37 +74,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
     Statement = [
       {
         Effect = "Allow",
-        Action = "s3:*",
-        Resource = "arn:aws:s3:::*"
-      },
-      {
-        Effect = "Allow",
-        Action = "dynamodb:*",
-        Resource = "arn:aws:dynamodb:*:*:table/*"
-      },
-      {
-        Effect = "Allow",
-        Action = "ecr:*",
-        Resource = "arn:aws:ecr:*:*:repository/*"
-      },
-      {
-        Effect = "Allow",
-        Action = "ec2:*",
-        Resource = "*"
-      },
-      {
-        Effect = "Allow",
-        Action = "iam:*",
-        Resource = "arn:aws:iam::*:role/*"
-      },
-      {
-        Effect = "Allow",
-        Action = "secretsmanager:*",
-        Resource = "arn:aws:secretsmanager:*:*:secret:*"
-      },
-      {
-        Effect = "Allow",
-        Action = "vpc:*",
+        Action = "*",
         Resource = "*"
       }
     ]
