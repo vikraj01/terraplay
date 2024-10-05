@@ -87,7 +87,7 @@ func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	err = dynamodbService.UpdateSessionStatusAndIP(sessionId, "running", newServerIP)
+	err = dynamodbService.UpdateSessionStatusAndIP(sessionId, "running", newServerIP, details.InstanceId)
 	if err != nil {
 		log.Printf("Error updating session with new IP: %v", err)
 		s.ChannelMessageSend(m.ChannelID, "⚠️ Error updating session with new IP.")
