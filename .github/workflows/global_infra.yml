@@ -43,5 +43,5 @@ jobs:
               run: terraform workspace select ${{ secrets.GLOBAL_WORKSPACE_NAME}} || terraform workspace new ${{ secrets.GLOBAL_WORKSPACE_NAME }}
 
             - name: Terraform Apply
-              if: github.ref == 'ref/heads/main' && github.event_name == 'push'
+              if: github.ref == 'refs/heads/main' && github.event_name == 'push'
               run: terraform apply -auto-approve

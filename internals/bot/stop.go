@@ -68,7 +68,7 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	message := fmt.Sprintf(
 		"EC2 instance with IP `%s` has been backed up and stopped. Workspace: `%s`", details.ServerIP, details.Workspace)
-	dynamodbService.UpdateSessionStatusAndIP(sessionId, "halted", details.ServerIP)
+	dynamodbService.UpdateSessionStatusAndIP(sessionId, "halted", details.ServerIP, details.InstanceId)
 	s.ChannelMessageSend(m.ChannelID, message)
 }
 
