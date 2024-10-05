@@ -1,11 +1,19 @@
+# -------------------------
+# Project Information
+# -------------------------
 variable "project_name" {
-  type = string
+  description = "The name of the project or application. Used as a prefix for naming resources to group them logically."
+  type        = string
 }
 
 variable "managed_by" {
-  type = string
+  description = "The team or individual responsible for managing the infrastructure. Typically used as a tag for resource identification."
+  type        = string
 }
 
+# -------------------------
+# VPC and Networking Configuration
+# -------------------------
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC. This defines the IP address range for the VPC."
   type        = string
@@ -20,12 +28,16 @@ variable "subnet_config" {
   }))
 }
 
+# -------------------------
+# Security Group Configuration
+# -------------------------
 variable "security_group_description" {
   description = "A description for the security group"
   type        = string
 }
 
 variable "ingress_rules" {
+  description = "A map defining ingress (inbound) rules for the security group. Includes the port range, protocol, CIDR blocks, and a description for each rule."
   type = map(object({
     from_port   = number
     to_port     = number
@@ -37,6 +49,7 @@ variable "ingress_rules" {
 }
 
 variable "egress_rules" {
+  description = "A map defining egress (outbound) rules for the security group. Includes the port range, protocol, CIDR blocks, and a description for each rule."
   type = map(object({
     from_port   = number
     to_port     = number
@@ -47,14 +60,17 @@ variable "egress_rules" {
   default = {}
 }
 
+# -------------------------
+# DynamoDB Table Configuration
+# -------------------------
 variable "table_name" {
-  description = "The name of the DynamoDB table."
+  description = "The name of the DynamoDB table used for session tracking or other purposes."
   type        = string
 }
 
 variable "hash_key" {
-  type        = string
   description = "The partition key for the DynamoDB table."
+  type        = string
 }
 
 variable "range_key" {
@@ -82,15 +98,21 @@ variable "global_secondary_indexes" {
   }))
 }
 
+# -------------------------
+# EC2 Instance Configuration
+# -------------------------
 variable "key_pair_name" {
-
+  description = "The name of the SSH key pair used for connecting to the EC2 instances. Ensure the private key is stored securely."
+  type        = string
 }
 
 variable "instance_type" {
-
+  description = "The EC2 instance type for the server (e.g., t2.micro, m5.large), defining the compute power and pricing of the instance."
+  type        = string
 }
 
 variable "ebs_volumes" {
+  description = "A list of EBS volumes to attach to the EC2 instance. Each volume includes configuration for device name, size, and volume type (e.g., gp2, gp3)."
   type = list(object({
     device_name = string
     volume_size = number
@@ -99,12 +121,32 @@ variable "ebs_volumes" {
   default = []
 }
 
-
+# -------------------------
+# ECR Configuration
+# -------------------------
 variable "ecr_repository_name" {
-  
+  description = "The name of the Amazon Elastic Container Registry (ECR) repository where Docker images are stored for the bot server."
+  type        = string
 }
 
+# -------------------------
+# IAM Role and Trusted Entities Configuration
+# -------------------------
 variable "trusted_entities" {
-  type = list(string)
-  default = [  ]
+  description = "A list of AWS services or accounts that are allowed to assume the IAM role. Common values include services like 'ec2.amazonaws.com' for EC2 or specific AWS account IDs."
+  type        = list(string)
+  default     = []
+}
+
+# -------------------------
+# AWS Account and Region
+# -------------------------
+variable "account_id" {
+  description = "The AWS account ID where resources will be deployed."
+  type        = string
+}
+
+variable "region" {
+  description = "The AWS region in which to deploy all resources."
+  type        = string
 }

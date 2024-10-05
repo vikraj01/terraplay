@@ -15,7 +15,7 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not initialize database. Please try again later.")
+		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not initialize the database. Please try again later.")
 		return
 	}
 
@@ -26,6 +26,7 @@ func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	sessionId := args[2]
+
 	details, err := dynamodbService.GetDetailsBySessionID(sessionId)
 	if err != nil {
 		log.Printf("Error fetching sessionId details: %v", err)
