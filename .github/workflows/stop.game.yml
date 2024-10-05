@@ -16,7 +16,6 @@ permissions:
     contents: read
     pull-requests: write
 env:
-    TF_LOG: INFO
     AWS_REGION: ${{ secrets.AWS_REGION }}
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
     TF_BACKEND_STATE_STORAGE: ${{ secrets.TF_BACKEND_STATE_STORAGE }}
@@ -45,7 +44,7 @@ jobs:
           - name: Terraform init
             id: init
             run: terraform init -backend-config="bucket=${TF_BACKEND_STATE_STORAGE}" -backend-config="key=${TF_BACKEND_KEY}" -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" -backend-config="region=${AWS_REGION}"   
-            
+
           - name: Setup Infrastructure
             run: |
               chmod +x ./scripts/kill.sh
