@@ -13,6 +13,7 @@ import (
 	"regexp"
 
 	"github.com/vikraj01/terraplay/internals/dynamodb"
+	"github.com/vikraj01/terraplay/internals/utils"
 )
 
 type WorkflowRunPayload struct {
@@ -150,7 +151,12 @@ func handleStartAction(values map[string]string, payload WorkflowRunPayload, dyn
 		return fmt.Errorf("DynamoDBService is not initialized")
 	}
 
-	dynamoService.UpdateSessionStatusAndIP(runID, "running", serverIP, instanceId)
+	instanceID, err := utils.GetInstanceIDByPublicIP(serverIP)
+	if err != nil {
+		log.Printf("Failed to retrieve instance ID for server IP %s: %v", serverIP, err)
+		return fmt.Errorf("failed to retrieve instance ID for server IP %s: %v", serverIP, err)
+	}
+	dynamoService.UpdateSessionStatusIPAndInstance(runID, "running", serverIP, instanceID)
 
 	cleanupExtractedFiles(folder)
 	return nil

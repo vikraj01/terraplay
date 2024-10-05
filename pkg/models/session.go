@@ -13,4 +13,5 @@ type Session struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	WorkSpace  string    `json:"workspace"`
+	InstanceId string    `json:"instance_id"`
 }

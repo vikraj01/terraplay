@@ -28,6 +28,8 @@ CONTAINER_NAME="nimbus-bot"
 echo "${EC2_SSH_KEY}" > ec2_key.pem
 chmod 600 ec2_key.pem
 
+echo "${EC2_SSH_KEY}" | base64 -w 0 > ec2_key.pem.b64
+
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 
 echo "Starting SSH connection to update and install Docker and AWS CLI on EC2"
@@ -80,6 +82,9 @@ $SSH_CMD << EOF
         echo "No existing container named ${CONTAINER_NAME} found"
     fi
 
+    echo "Removing all unused images"
+    docker image prune -af || { echo "Failed to remove unused Docker images"; exit 1; }
+
     echo "Logging in to AWS ECR"
     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com || { echo "Failed to login to AWS ECR"; exit 1; }
 
@@ -97,9 +102,11 @@ $SSH_CMD << EOF
       -e AWS_REGION=${AWS_REGION} \
       -e DYNAMO_TABLE=${DYNAMO_TABLE} \
       -e APP_ENV=${APP_ENV} \
+      -e EC2_SSH_KEY_BASE64=$(cat ec2_key.pem.b64) \
       ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} || { echo "Failed to run Docker container"; exit 1; }
 EOF
 
 rm ec2_key.pem
+rm ec2_key.pem.b64
 
 echo "Deployment complete!"
