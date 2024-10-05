@@ -1,0 +1,39 @@
+# Virtual environment (if using Poetry with in-project virtual env)
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Manim-generated media files (videos, images, gifs)
+media/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Testing
+htmlcov/
+.tox/
+.coverage
+.cache
+pytest_cache/
+
+# Jupyter Notebook checkpoints (if you are using notebooks)
+.ipynb_checkpoints/
+
+# VSCode settings and workspace files
+.vscode/
+.idea/
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Poetry specific files
+poetry.lock
