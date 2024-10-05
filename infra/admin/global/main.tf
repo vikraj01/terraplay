@@ -64,7 +64,7 @@ module "global_ecr_repository" {
 # -------------------------
 module "global_bucket" {
   source      = "../../modules/storage"
-  bucket_name = "global-bucket-893606"
+  bucket_name = "global-terraplay-bucketv1"
 }
 
 # -------------------------
@@ -172,8 +172,12 @@ resource "aws_iam_policy" "bot_server_access_policy" {
         Effect   = "Allow",
         Action   = "secretsmanager:ListSecrets",
         Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = "ec2:*",
+        Resource = "*"
       }
-
     ]
   })
 }
@@ -186,28 +190,33 @@ resource "aws_iam_role_policy_attachment" "bot_server_role_policy_attachment" {
 # -------------------------
 # IAM Policy for EC2 Instance - EC2 Management Permissions / For Github Actions
 # -------------------------
-resource "aws_iam_policy" "ec2_instance_policy" {
-  name = "ec2-instance-github-actions-policy"
+# resource "aws_iam_policy" "ec2_instance_policy" {
+#   name = "ec2-instance-github-actions-policy"
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "ec2:StartInstances",
-          "ec2:StopInstances",
-          "ec2:RebootInstances"
-        ],
-        Resource = [
-          "arn:aws:ec2:${var.region}:${var.account_id}:instance/${module.bot_server.instance_id}"
-        ]
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Action = [
+#           "ec2:StartInstances",
+#           "ec2:StopInstances",
+#           "ec2:RebootInstances"
+#         ],
+#         Resource = [
+#           "arn:aws:ec2:${var.region}:${var.account_id}:instance/${module.bot_server.instance_id}"
+#         ]
+#       }
+#     ]
+#   })
+# }
 
-resource "aws_iam_role_policy_attachment" "attach_custom_policy_to_role" {
-  role       = data.aws_iam_role.github_actions_role.name
-  policy_arn = aws_iam_policy.ec2_instance_policy.arn
-}
+# resource "aws_iam_role_policy_attachment" "attach_custom_policy_to_role" {
+#   role       = data.aws_iam_role.github_actions_role.name
+#   policy_arn = aws_iam_policy.ec2_instance_policy.arn
+# }
+
+
+
+
+// Temporarily actions have all the power! but after finalization! following stricter policy tightening will be happen for all of them

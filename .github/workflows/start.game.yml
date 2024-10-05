@@ -15,26 +15,51 @@ on:
         description: "To track the action workflow dispatch"
         required: true
         type: string
-
+permissions:
+    id-token: write
+    contents: read
+    pull-requests: write
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+    TF_LOG: INFO
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+    TF_BACKEND_STATE_STORAGE: ${{ secrets.TF_BACKEND_STATE_STORAGE }}
+    TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+    TF_BACKEND_LOCK_TABLE: ${{ secrets.TF_BACKEND_LOCK_TABLE }}
+    GLOBAL_WORKSPACE_NAME: ${{secrets.GLOBAL_WORKSPACE_NAME}}
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+          shell: bash
+          working-directory: ./infra
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Terraform init
+        id: init
+        run: terraform init -backend-config="bucket=${TF_BACKEND_STATE_STORAGE}" -backend-config="key=${TF_BACKEND_KEY}" -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" -backend-config="region=${AWS_REGION}"        
+
+
       - name: Setup Infrastructure And Output
         run: |
-          chmod +x ./scripts/start.sh
-          ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
-        working-directory: ./infra
+          GAME=${{ github.event.inputs.game }}
+          USER_ID=${{ github.event.inputs.user_id }}
+          WORKSPACE_NAME="$USER_ID@$GAME"
+          terraform workspace select "$WORKSPACE_NAME" || terraform workspace new "$WORKSPACE_NAME"
+          terraform apply -var-file="env/${GAME}.tfvars" -var-file="env/common/terraform.tfvars" -var="bucket=${TF_BACKEND_STATE_STORAGE}" -var="key=${TF_BACKEND_KEY}" -var="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" -var="region=${AWS_REGION}" -var="global_workspace_name=${GLOBAL_WORKSPACE_NAME}" -auto-approve
 
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"

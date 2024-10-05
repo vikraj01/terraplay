@@ -1,7 +1,6 @@
 WORKSPACE=$1
 DEFAULT="default"
 
-terraform init --backend-config="./env/backend.conf" --backend-config="key=terraform.tfstate"
 terraform workspace select $WORKSPACE
 terraform destroy -auto-approve
 terraform workspace select $DEFAULT
