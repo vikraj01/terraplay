@@ -136,7 +136,6 @@ func handleStartAction(values map[string]string, payload WorkflowRunPayload, dyn
 	game := values["game"]
 	serverIP := values["server_ip"]
 	runID := values["run_id"]
-	instanceId := values["server_id"]
 
 	if userID == "" || game == "" || serverIP == "" || runID == "" {
 		errorMessage := fmt.Sprintf("Missing values in logs: game=%s, user_id=%s, server_ip=%s, run_id=%s", game, userID, serverIP, runID)
