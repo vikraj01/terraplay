@@ -38,3 +38,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Docker image ${IMAGE_NAME}:${IMAGE_TAG} successfully pushed to ${ECR_URL}!"
+
