@@ -1,109 +1,45 @@
-## Terraplay
+# Terraplay
 
-### Terraform Init Alias
+Terraplay is a tool that combines a Discord bot (written in Go) and Terraform to manage game servers. It automates the process of provisioning and managing game environments by using Terraform workspaces, creating isolated infrastructure for each game session.
 
-To streamline Terraform initialization with dynamic backend configurations, add this alias to your shell configuration (`~/.bashrc` or `~/.zshrc`):
+## Features
 
-```bash
-alias terraform-init='export WORKSPACE=$(terraform workspace show) && terraform init --backend-config="./env/backend.conf" --backend-config="key=terraform.tfstate"'
-```
+### Keeper Infrastructure
+- **State Management**: Uses a remote state file to track the infrastructure.
+- **Session Locking**: Prevents multiple operations on the same game environment by locking Terraform sessions.
+- **Secure Authentication**: Uses **OpenID Connect (OIDC)** for GitHub Actions to avoid using hardcoded access keys.
 
-### Usage:
-Run `terraform-init` to initialize Terraform with dynamic workspace-based state management.
+### Global Infrastructure
+- **Networking**: Uses a Virtual Private Cloud (VPC) and public subnet for game servers.
+- **Game Configuration (`game.yml`)**: Stores game-specific configurations like firewall rules and storage paths.
+- **SSH Access**: Single SSH key for all servers (can be customized for security).
+- **Discord Bot VM**: Manages Terraform workflows and stores secrets securely.
+- **Game Data Backup**: Automatically backs up game data to S3 after each session or when stopping the server.
 
-### Example `backend.conf`:
+### Game Infrastructure
+Each game session is handled using a **Terraform workspace**. The workspace names follow the format `<random_id>@<game_name>`, allowing easy identification and parameterization for different games.
 
-```hcl
-bucket         = "your-backend-bucket-name"
-region         = "your-region"
-dynamodb_table = "terraform-state-lock-table"
-```
+- **Dynamic Resource Allocation**: Networking, firewalls, and other resources are set up based on the game and session.
+- **Custom Game Environments**: Each game environment is customized based on game-specific scripts.
 
-This configuration allows you to manage Terraform state files based on the current workspace without hardcoding the file paths.
+## Commands
 
-### Workspace Naming Convention:
+Terraplay is controlled via simple Discord commands:
 
-- The workspace name should follow the pattern: `(project-id):(environment)`
-  - Example workspaces:
-    - `terraplay:global`
-    - `terraplay:minecraft`
-    - `terraplay:terraria`
+1. **`!create <game>`**  
+   Starts a new game session by provisioning the required infrastructure.
+   
+2. **`!list-sessions <all, running, halted, terminated>`**  
+   Lists all game sessions, filtered by their current status.
+   
+3. **`!stop <sessionId>`**  
+   Stops a game session and backs up the data to S3.
+   
+4. **`!destroy <sessionId>`**  
+   Destroys the infrastructure related to a game session.
+   
+5. **`!restart <sessionId>`**  
+   Restarts a stopped session, restoring game data from the backup.
 
-### Terraform Apply Alias:
-
-To dynamically load `tfvars` files based on the current workspace, use this alias:
-
-```bash
-alias terraform-apply='ENV=$(terraform workspace show); ENV=${ENV##*@}; terraform apply -var-file=env/$ENV.tfvars -var-file=env/common/terraform.tfvars'
-```
-
-### Usage:
-- Run `terraform-apply` to apply Terraform configurations with workspace-specific and common variables.
-
-This alias extracts the environment part of the workspace (i.e., everything after the `:`) and uses it to dynamically load the appropriate `.tfvars` files.
-
-
-
-
-### Temproray
-alias terraform-apply='export BACKEND_BUCKET="terraplay-backend-80f0b90026287b08"; export AWS_REGION="ap-south-1"; export DYNAMODB_TABLE="terraform-state-lock"; ENV=$(terraform workspace show); ENV=${ENV##*:}; terraform apply -var-file=env/$ENV.tfvars -var-file=env/common/terraform.tfvars'
-
-alias terraform-apply='terraform apply -var="backend_bucket=$BACKEND_BUCKET" -var="aws_region=$AWS_REGION" -var="dynamodb_table=$DYNAMODB_TABLE" -var-file=env/${ENV}.tfvars -var-file=env/common/terraform.tfvars'
-
-
-alias terraform-init='export WORKSPACE=$(terraform workspace show) && terraform init --backend-config="./env/backend.conf" --backend-config="key=env/${WORKSPACE}/terraform.tfstate"'
-
-
-
-
-
-alias terraform-refresh='ENV=$(terraform workspace show); ENV=${ENV##*@}; terraform refresh -var-file=env/$ENV.tfvars -var-file=env/common/terraform.tfvars'
-
-alias terraform-destory='terraform destory -var="backend_bucket=$BACKEND_BUCKET" -var="aws_region=$AWS_REGION" -var="dynamodb_table=$DYNAMODB_TABLE" -var-file=env/${ENV}.tfvars -var-file=env/common/terraform.tfvars'
-
-
-alias terraform-destroy='ENV=$(terraform workspace show); ENV=${ENV##*@}; terraform destroy -var-file=env/$ENV.tfvars -var-file=env/common/terraform.tfvars'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[reddit-aws-host](https://www.reddit.com/r/aws/comments/fss6nx/considering_using_aws_to_host_a_minecraft_server/)
-[How to make cracked minecraft server](https://youtu.be/iJiTsM2MT3c)
-
-
-maybe i will use secrets-manager!
-
-oh oh oh, i can create an oidc for the github actons and connect this to my AWS!
-I can write one script to automate it powerfully! put it into scripts-pool!
-
-
-ngrok config add-authtoken 2ml9xN7HSrWB9ZKSh5s4BVdxQwC_4BDYRg3i3QZdwbSsXrvYY
-
-https://github.com/orgs/community/discussions/9752
-ngrok http 8080 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// hardcoding value
-// oidc
+6. **`!list-games`**  
+   Shows all available games that can be provisioned.
