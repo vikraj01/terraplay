@@ -4,6 +4,7 @@ on:
   repository_dispatch:
     types: [deploy-trigger]
 
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,6 +14,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.client_payload.ref }}
+      
+      - name: Set debug flag to true
+        run: echo "ACTION_STEP_DEBUG=true" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
