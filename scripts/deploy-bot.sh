@@ -33,7 +33,8 @@ echo "SSH connection details: ${SSH_USER:0:3}***@${HOST:0:3}***"
 
 echo "::remove-mask::${SSH_USER}"
 echo "::remove-mask::${SSH}"
-SSH_CMD="ssh -i ec2_key.pem  ec2-user@3.110.160.13"
+SSH_CMD="ssh -i ec2_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST}"
+
 echo "$SSH_CMD"
 
 echo "Starting SSH connection to update and install Docker and AWS CLI on EC2"
