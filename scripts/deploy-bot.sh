@@ -32,8 +32,7 @@ echo "${EC2_SSH_KEY}" | base64 -w 0 > ec2_key.pem.b64
 echo "SSH connection details: ${SSH_USER:0:3}***@${HOST:0:3}***"
 
 echo "::remove-mask::${SSH_USER}"
-echo "SSH connection details: $SSH_USER@$HOST"
-
+echo "::remove-mask::${SSH}"
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
 echo "$SSH_CMD"
 
