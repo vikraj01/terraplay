@@ -31,6 +31,7 @@ chmod 600 ec2_key.pem
 echo "${EC2_SSH_KEY}" | base64 -w 0 > ec2_key.pem.b64
 
 SSH_CMD="ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST}"
+echo "$SSH_CMD"
 
 echo "Starting SSH connection to update and install Docker and AWS CLI on EC2"
 $SSH_CMD << EOF
