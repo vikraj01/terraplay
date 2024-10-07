@@ -3,7 +3,7 @@ resource "random_id" "bucket_prefix" {
 }
 module "backend_storage" {
   source      = "../../modules/storage"
-  bucket_name = "${var.project_name}-backend-${random_id.bucket_prefix.hex}"
+  bucket_name = "${var.project_name}-state-storage-v${random_id.bucket_prefix.hex}"
 
   tags = merge(local.storage_tags, {
     Name = "${var.project_name}-backend-${random_id.bucket_prefix.hex}"
