@@ -108,5 +108,5 @@ EOF
 
 rm ec2_key.pem
 rm ec2_key.pem.b64
-
+ 
 echo "Deployment complete!"
