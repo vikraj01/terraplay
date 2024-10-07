@@ -48,6 +48,7 @@ jobs:
       - name: SSH to ec2
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem && chmod 600 private_key.pem
+          cat private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${EC2_USER}@${EC2_HOST}
       
       - name: SSH completed
