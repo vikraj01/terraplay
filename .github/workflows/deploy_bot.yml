@@ -3,75 +3,34 @@ name: Deploy Bot to EC2
 on:
   repository_dispatch:
     types: [deploy-trigger]
+permissions:
+    id-token: write
+    contents: read
+    pull-requests: write
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+            run:
+                shell: bash
+                working-directory: ./
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.client_payload.ref }}
-      
-      - name: Set debug flag to true
-        run: echo "ACTION_STEP_DEBUG=true" >> $GITHUB_ENV
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials from AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
-      
-      - name: Encode the secrets
-        run: |
-          echo "${{ secrets.EC2_HOST }}" | base64
-          echo "Base64-encoded secret: $(echo "${{ secrets.EC2_HOST }}" | base64)"
-
-          - name: Print environment variables (for debugging)
-          run: |
-            echo "::remove-mask::${{ secrets.EC2_HOST }}"
-            echo "EC2_HOST=${{ secrets.EC2_HOST }}"
-            
-            echo "::remove-mask::${{ secrets.EC2_USER }}"
-            echo "EC2_USER=${{ secrets.EC2_USER }}"
-            
-            echo "::remove-mask::${{ secrets.AWS_ACCESS_KEY_ID }}"
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
-            
-            echo "::remove-mask::${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-            
-            echo "::remove-mask::${{ secrets.AWS_REGION }}"
-            echo "AWS_REGION=${{ secrets.AWS_REGION }}"
-            
-            echo "::remove-mask::${{ secrets.AWS_ACCOUNT_ID }}"
-            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
-            
-            echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}"
-            
-            echo "::remove-mask::${{ secrets.DISCORD_BOT_TOKEN }}"
-            echo "DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}"
-            
-            echo "::remove-mask::${{ secrets.DISCORD_CHANNEL_ID }}"
-            echo "DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }}"
-            
-            echo "::remove-mask::${{ secrets.REPO_TOKEN }}"
-            echo "REPO_TOKEN=${{ secrets.REPO_TOKEN }}"
-            
-            echo "::remove-mask::${{ secrets.ACTIONS_WEBHOOK_SECRET }}"
-            echo "ACTIONS_WEBHOOK_SECRET=${{ secrets.ACTIONS_WEBHOOK_SECRET }}"
-            
-            echo "::remove-mask::${{ secrets.DYNAMO_TABLE }}"
-            echo "DYNAMO_TABLE=${{ secrets.DYNAMO_TABLE }}"
-            
-            echo "::remove-mask::${{ secrets.APP_ENV }}"
-            echo "APP_ENV=${{ secrets.APP_ENV }}"
-            
-            echo "::remove-mask::${{ secrets.EC2_SSH_KEY }}"
-            echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}"
-        
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
 
       - name: Deploy Bot to EC2
         env:
