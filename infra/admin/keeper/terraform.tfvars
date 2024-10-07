@@ -1,4 +1,4 @@
 region       = "ap-south-1"
-project_name = "terraplay-keeper"
+project_name = "terraplay"
 hash_key     = "LockID"
-table_name   = "terraform-state-lock"
+table_name   = "terraform_state_lock"
