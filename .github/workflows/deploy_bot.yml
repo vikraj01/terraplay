@@ -3,40 +3,41 @@ name: Deploy Bot to EC2
 on:
   repository_dispatch:
     types: [deploy-trigger]
+
 permissions:
-    id-token: write
-    contents: read
-    pull-requests: write
+  id-token: write
+  contents: read
+  pull-requests: write
+
 env:
-    AWS_REGION: ${{ secrets.AWS_REGION }}
-    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-    EC2_HOST: ${{ secrets.EC2_HOST }}
-    EC2_USER: ${{ secrets.EC2_USER }}
-    EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
-    DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-    DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
-    REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-    ACTIONS_WEBHOOK_SECRET: ${{ secrets.ACTIONS_WEBHOOK_SECRET }}
-    DYNAMO_TABLE: ${{ secrets.DYNAMO_TABLE }}
-    APP_ENV: ${{ secrets.APP_ENV }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  EC2_USER: ${{ secrets.EC2_USER }}
+  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
+  DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+  DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+  ACTIONS_WEBHOOK_SECRET: ${{ secrets.ACTIONS_WEBHOOK_SECRET }}
+  DYNAMO_TABLE: ${{ secrets.DYNAMO_TABLE }}
+  APP_ENV: ${{ secrets.APP_ENV }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     defaults:
-            run:
-                shell: bash
-                working-directory: ./
+      run:
+        shell: bash
+        working-directory: ./
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.client_payload.ref }}
-        
 
       - name: Configure AWS credentials from AWS account
         uses: aws-actions/configure-aws-credentials@v1
@@ -45,31 +46,17 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHub-OIDC-TERRAFORM
       
-      - name: SSH to ec2
-        run: |
-          echo "$EC2_SSH_KEY" > private_key.pem && chmod 600 private_key.pem
-          cat private_key.pem
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${EC2_USER}@${EC2_HOST}
+      - name: Setup SSH for EC2
+        uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
+        with:
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_URL: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USER }}
       
       - name: SSH completed
-        run: |
-          echo "SSH completed man!"
+        run: echo "SSH completed"
+
       - name: Deploy Bot to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
-          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-          ACTIONS_WEBHOOK_SECRET: ${{ secrets.ACTIONS_WEBHOOK_SECRET }}
-          DYNAMO_TABLE: ${{ secrets.DYNAMO_TABLE }}
-          APP_ENV: ${{ secrets.APP_ENV }}
         run: |
           chmod +x ./scripts/deploy-bot.sh
           ./scripts/deploy-bot.sh
