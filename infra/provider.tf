@@ -8,9 +8,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "terraplay-keeper-backend-da28ee014ea0433f"
+    bucket         = "terraplay-state-storage-v1c2946c2056f6cd0"
     region         = "ap-south-1"
-    dynamodb_table = "terraform-state-lock"
+    dynamodb_table = "terraform_state_lock"
     key            = "terraform.tfstate"
   }
 }

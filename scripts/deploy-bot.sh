@@ -53,17 +53,29 @@ $SSH_CMD << EOF
     sudo systemctl restart docker || { echo "Failed to restart Docker service"; exit 1; }
 
     if aws --version 2>&1 >/dev/null; then
-        echo "AWS CLI is already installed, updating it"
-        sudo ./aws/install --update || { echo "Failed to update AWS CLI"; exit 1; }
+    echo "AWS CLI is already installed, checking version"
+    current_version=$(aws --version | awk '{print $1}' | cut -d/ -f2)
+    latest_version=$(curl -s "https://github.com/aws/aws-cli/releases/latest" | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+
+    if [ "$current_version" != "$latest_version" ]; then
+            echo "Updating AWS CLI from version $current_version to $latest_version"
+            sudo yum install -y unzip || { echo "Failed to install unzip"; exit 1; }
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" || { echo "Failed to download AWS CLI"; exit 1; }
+            unzip awscliv2.zip || { echo "Failed to unzip AWS CLI"; exit 1; }
+            sudo ./aws/install || { echo "Failed to install AWS CLI"; exit 1; }
+            rm -rf awscliv2.zip aws
+        else
+            echo "AWS CLI is up to date"
+        fi
     else
         echo "Installing AWS CLI"
         sudo yum install -y unzip || { echo "Failed to install unzip"; exit 1; }
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" || { echo "Failed to download AWS CLI"; exit 1; }
         unzip awscliv2.zip || { echo "Failed to unzip AWS CLI"; exit 1; }
         sudo ./aws/install || { echo "Failed to install AWS CLI"; exit 1; }
-        echo "Cleaning up AWS CLI installation files"
         rm -rf awscliv2.zip aws
     fi
+
 EOF
 echo "SSH connection complete. Docker and AWS CLI setup finished."
 
