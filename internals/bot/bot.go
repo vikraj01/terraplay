@@ -42,7 +42,7 @@ func StartBot() {
 		log.Fatalf("Error opening connection: %v", err)
 		return
 	}
-	
+
 	interactions.RegisterInteractionCommands(session)
 	fmt.Println("Bot is now running. Press CTRL+C to exit.")
 
@@ -66,3 +66,14 @@ func StartBot() {
 // !logs
 // !cost
 // !config - config permission for other team member to handle server permission
+
+
+// V2
+
+// 1. Setup Interaction
+// 2. Add cli
+// 3. Config Power To User For many different things
+// 3. Cosmetics Heavy UI / UX
+// 3. Expenses & Logs with cloudwatch [ many different sources ]
+// 4. Update config Option - For Everything Possible!
+// 5. Tightening Security - Phase 1
