@@ -7,7 +7,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/vikraj01/terraplay/internals/dynamodb"
-	"github.com/vikraj01/terraplay/internals/github"
+	"github.com/vikraj01/terraplay/internals/game"
 )
 
 func HandleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -25,24 +25,10 @@ func HandleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	sessionId := args[2]
 
-	details, err := dynamodbService.GetDetailsBySessionID(sessionId)
-	workspaceID := details.Workspace
+	workspaceID, err := game.DestroyGameSession(sessionId, dynamodbService)
 	if err != nil {
-		log.Printf("Error fetching sessionId details: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Could not find workspace for the given session ID.")
-		return
-	}
-	log.Printf("Workspace ID: %s", workspaceID)
-
-	inputs := map[string]string{
-		"run_id":    sessionId,
-		"workspace": workspaceID,
-	}
-
-	err = github.TriggerGithubAction("vikraj01", "terraplay", "stop.game.yml", "main", inputs)
-	if err != nil {
-		log.Printf("Failed to trigger GitHub Action: %v", err)
-		s.ChannelMessageSend(m.ChannelID, "⚠️ Error: Failed to trigger the destruction of the game session.")
+		log.Printf("Error during game session destruction: %v", err)
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("⚠️ Error: %s", err.Error()))
 		return
 	}
 
