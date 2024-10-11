@@ -76,7 +76,7 @@ func createGame(cmd *cobra.Command, args []string) {
 		log.Fatalf("Failed to parse server response: %v", err)
 	}
 
-	fmt.Printf("Game server created successfully! Server IP: %s\n", responseBody.ServerIP)
+	fmt.Printf("Game server will be provisioning soon successfully! Server IP: %s\n", responseBody.ServerIP)
 }
 
 func loadTokenConfig() (*Config, error) {
