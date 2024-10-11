@@ -10,10 +10,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/vikraj01/terraplay/config"
+	"github.com/vikraj01/terraplay/internals/utils"
 )
 
 var CreateGameCmd = &cobra.Command{
-	Use:   "create-game",
+	Use:   string(config.CreateGame),
 	Short: "Create a game server",
 	Long:  `Create a new game server session through the Zephyr server.`,
 	Run:   createGame,
@@ -26,7 +28,7 @@ func createGame(cmd *cobra.Command, args []string) {
 
 	gameName := args[0]
 
-	config, err := loadConfig()
+	config, err := loadTokenConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -36,8 +38,8 @@ func createGame(cmd *cobra.Command, args []string) {
 	}
 
 	payload := map[string]string{
-		"game":     gameName,
-		"user_id":  config.UserID,
+		"game":      gameName,
+		"user_id":   config.UserID,
 		"user_name": config.Username,
 	}
 	payloadBytes, err := json.Marshal(payload)
@@ -77,20 +79,13 @@ func createGame(cmd *cobra.Command, args []string) {
 	fmt.Printf("Game server created successfully! Server IP: %s\n", responseBody.ServerIP)
 }
 
-func loadConfig() (*Config, error) {
-	configPath := os.ExpandEnv("$HOME/.zephyr/config.json")
-
-	file, err := os.Open(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open config file: %v", err)
-	}
-	defer file.Close()
-
+func loadTokenConfig() (*Config, error) {
 	var config Config
-	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return nil, fmt.Errorf("failed to decode config: %v", err)
+	baseDir := os.Getenv("HOME") + "/.zephyr"
+	if err := utils.LoadConfig(baseDir, "config.json", &config); err != nil {
+		return nil, fmt.Errorf("failed to load configuration: %v", err)
 	}
 
+	log.Printf("Loaded configuration: %v", config)
 	return &config, nil
 }
-
