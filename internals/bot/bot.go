@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/internals/interactions"
 	// "github.com/joho/godotenv"
 )
 
@@ -30,8 +31,9 @@ func StartBot() {
 	}
 
 	session.AddHandler(messageHandler)
+	session.AddHandler(interactions.InteractionHandlers)
 
-	session.Identify.Intents = discordgo.IntentsGuildMessages
+	session.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsGuildMessageReactions
 
 	err = session.Open()
 	if err != nil {
@@ -39,8 +41,9 @@ func StartBot() {
 		return
 	}
 
+	interactions.RegisterInteractionCommands(session)
 	fmt.Println("Bot is now running. Press CTRL+C to exit.")
-
+	
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-stop
