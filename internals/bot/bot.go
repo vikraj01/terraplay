@@ -76,4 +76,5 @@ func StartBot() {
 // 3. Cosmetics Heavy UI / UX
 // 3. Expenses & Logs with cloudwatch [ many different sources ]
 // 4. Update config Option - For Everything Possible!
+// 4. One Health Manager, who do workspace cleanup and pending cleanups + Check global infra health! + Global infra spending
 // 5. Tightening Security - Phase 1
