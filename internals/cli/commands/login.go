@@ -149,6 +149,7 @@ func saveTokenLocally(token, userID, username string) error {
 	}
 	defer file.Close()
 
+	log.Print(configData)
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(configData); err != nil {
 		return fmt.Errorf("failed to write to config file: %v", err)
