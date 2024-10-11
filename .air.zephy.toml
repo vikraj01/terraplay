@@ -1,0 +1,9 @@
+# .air.zephyr.toml
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/zephyr ./cmd/zephyr/main.go"
+bin = "./tmp/zephyr"
+delay = 2000
