@@ -18,7 +18,7 @@ func HandleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	gameName := args[2]
 
-	if config.IsValidGame(gameName) {
+	if !config.IsValidGame(gameName) {
 		s.ChannelMessageSend(m.ChannelID, "❌ **Invalid game!** Please choose a valid game: `minetest`, `minecraft`, `fortnite`, `apex`, `csgo`")
 		return
 	}

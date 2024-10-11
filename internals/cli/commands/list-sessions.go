@@ -18,12 +18,11 @@ var ListSessionsCmd = &cobra.Command{
 }
 
 func listSessions(cmd *cobra.Command, args []string) {
-	if len(args) < 2 {
-		log.Fatalf("Please provide a status and user ID as arguments. Example: zephyr list-sessions running <user_id>")
+	if len(args) < 1 {
+		log.Fatalf("Please provide a status as an argument. Example: zephyr list-sessions running")
 	}
 
 	status := args[0]
-	userID := args[1]
 
 	config, err := loadTokenConfig()
 	if err != nil {
@@ -34,6 +33,7 @@ func listSessions(cmd *cobra.Command, args []string) {
 		log.Fatalf("Access token not found. Please login first using 'zephyr login'.")
 	}
 
+	userID := config.UserID
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:8080/game/sessions?status=%s&user_id=%s", status, userID), nil)
 	if err != nil {
 		log.Fatalf("Failed to create request: %v", err)
