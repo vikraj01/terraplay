@@ -20,4 +20,3 @@ var StatusValues = map[string]Status{
 	"terminated": Terminated,
 }
 
-var Timeout = 30

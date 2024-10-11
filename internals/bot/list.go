@@ -11,6 +11,8 @@ import (
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 	"github.com/vikraj01/terraplay/pkg/models"
 )
+var validGames = []string{"minetest", "minecraft", "fortnite", "apex", "csgo"}
+
 
 func handleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamoService, err := dynamodb.InitializeDynamoDB()
