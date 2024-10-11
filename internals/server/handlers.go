@@ -6,6 +6,7 @@ import (
 )
 
 func RegisterRoutes(router *gin.Engine) {
-    router.GET("/auth/discord", handlers.DiscordAuthHandler)
-
+    router.GET("/auth/discord/initiate", handlers.InitiateDiscordOAuth)
+    router.GET("/auth/discord/callback", handlers.DiscordOAuthCallback)
+    router.GET("/auth/discord/status", handlers.CheckAuthStatus)
 }
