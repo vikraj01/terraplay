@@ -2,8 +2,10 @@ package utils
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -81,4 +83,25 @@ func ConnectToEC2ViaSSHWithRetry(sshConfig SSHConfig) (*ssh.Client, error) {
 	}
 
 	return nil, fmt.Errorf("failed to connect to EC2 via SSH after multiple attempts")
+}
+
+
+
+func GetSSHConfig(serverIP string, user string) (SSHConfig, error) {
+	sshKeyBase64 := os.Getenv("EC2_SSH_KEY_BASE64")
+	if sshKeyBase64 == "" {
+		return SSHConfig{}, fmt.Errorf("EC2_SSH_KEY_BASE64 is not set")
+	}
+
+	privateKey, err := base64.StdEncoding.DecodeString(sshKeyBase64)
+	if err != nil {
+		return SSHConfig{}, fmt.Errorf("error decoding base64 private key: %v", err)
+	}
+
+	return SSHConfig{
+		Host:       serverIP,
+		Port:       "22",
+		User:       user,
+		PrivateKey: privateKey,
+	}, nil
 }

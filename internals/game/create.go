@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/vikraj01/terraplay/config"
@@ -13,16 +12,7 @@ import (
 	"github.com/vikraj01/terraplay/pkg/models"
 )
 
-var validGames = []string{"minetest", "minecraft", "fortnite", "apex", "csgo"}
 
-func IsValidGame(gameName string) bool {
-	for _, game := range validGames {
-		if strings.EqualFold(game, gameName) {
-			return true
-		}
-	}
-	return false
-}
 
 func CreateGameSession(userID, globalName, gameName string) (models.Session, string, error) {
 	dynamoService, err := dynamodb.InitializeDynamoDB()

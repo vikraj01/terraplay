@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
 	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/config"
 	"github.com/vikraj01/terraplay/internals/game"
 )
 
@@ -16,7 +18,7 @@ func HandleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	gameName := args[2]
 
-	if !game.IsValidGame(gameName) {
+	if config.IsValidGame(gameName) {
 		s.ChannelMessageSend(m.ChannelID, "❌ **Invalid game!** Please choose a valid game: `minetest`, `minecraft`, `fortnite`, `apex`, `csgo`")
 		return
 	}
@@ -26,7 +28,7 @@ func HandleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	sessionModel, workspace, err := game.CreateGameSession(userID, globalName, gameName)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "🚫 **Error:** " + err.Error())
+		s.ChannelMessageSend(m.ChannelID, "🚫 **Error:** "+err.Error())
 		return
 	}
 
