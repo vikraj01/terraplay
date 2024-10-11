@@ -1,4 +1,5 @@
-package handlers
+package controllers
+
 
 import (
 	"log"

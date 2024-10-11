@@ -1,4 +1,4 @@
-package bot
+package handlers
 
 import (
 	"encoding/base64"
@@ -12,7 +12,7 @@ import (
 	"github.com/vikraj01/terraplay/internals/utils"
 )
 
-func handleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleRestartCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)

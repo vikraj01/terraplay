@@ -1,4 +1,4 @@
-package bot
+package handlers
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/vikraj01/terraplay/internals/game"
 )
 
-func handleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleCreateCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	args := strings.Fields(m.Content)
 	if len(args) < 2 {
 		s.ChannelMessageSend(m.ChannelID, "Usage: !create <game>")

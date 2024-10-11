@@ -1,4 +1,4 @@
-package bot
+package handlers
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 	"github.com/vikraj01/terraplay/internals/dynamodb"
 	"github.com/vikraj01/terraplay/pkg/models"
 )
-var validGames = []string{"minetest", "minecraft", "fortnite", "apex", "csgo"}
+var ValidGames = []string{"minetest", "minecraft", "fortnite", "apex", "csgo"}
 
 
-func handleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamoService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Error Occured while connecting to the dynamodb-database")
@@ -48,9 +48,9 @@ func handleListSessionCommand(s *discordgo.Session, m *discordgo.MessageCreate) 
 	var sessions []models.Session
 
 	if statusString == "all" {
-		sessions, err = dynamoService.GetActiveSessionsForUser(userID, "all")
+		sessions, err = dynamoService.GetSessionsBasedOnStatus(userID, "all")
 	} else {
-		sessions, err = dynamoService.GetActiveSessionsForUser(userID, statusString)
+		sessions, err = dynamoService.GetSessionsBasedOnStatus(userID, statusString)
 	}
 
 	if err != nil {
@@ -86,9 +86,9 @@ func formatSessionDetails(sessions []models.Session) string {
 	return messageBuilder.String()
 }
 
-func handleListGamesCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleListGamesCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	gameList := "**🎮 Available Games 🎮**\n\n"
-	for _, game := range validGames {
+	for _, game := range ValidGames {
 		gameList += game + "\n"
 	}
 	gameList += "\nType `!create <game_name>` to create a game server!"

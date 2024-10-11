@@ -1,4 +1,4 @@
-package bot
+package handlers
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/vikraj01/terraplay/internals/github"
 )
 
-func handleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleDestroyCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)

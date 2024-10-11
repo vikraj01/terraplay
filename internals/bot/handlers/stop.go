@@ -1,4 +1,4 @@
-package bot
+package handlers
 
 import (
 	"encoding/base64"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func handleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func HandleStopCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dynamodbService, err := dynamodb.InitializeDynamoDB()
 	if err != nil {
 		log.Printf("Error initializing DynamoDB: %v", err)
