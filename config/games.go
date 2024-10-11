@@ -36,8 +36,8 @@ func FindGameConfig(name string) *GameConfig {
 	return nil
 }
 
-func (gc *GameConfig) IsValid() bool {
-	return FindGameConfig(gc.Name) != nil
+func IsValidGame(name string) bool {
+	return FindGameConfig(name) != nil
 }
 
 func GetAllGames() []string {

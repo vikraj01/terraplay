@@ -37,6 +37,7 @@ jobs:
           ACTIONS_WEBHOOK_SECRET: ${{ secrets.ACTIONS_WEBHOOK_SECRET }}
           DYNAMO_TABLE: ${{ secrets.DYNAMO_TABLE }}
           APP_ENV: ${{ secrets.APP_ENV }}
+          AWS_GAME_BACKUP_BUCKET: ${{ secrets.AWS_GAME_BACKUP_BUCKET }}
         run: |
           chmod +x ./scripts/deploy-bot.sh
           ./scripts/deploy-bot.sh
