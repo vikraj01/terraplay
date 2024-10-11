@@ -16,6 +16,13 @@ import (
 type DynamoDBService struct {
 	Client *dynamodb.DynamoDB
 }
+type Details struct {
+	Workspace  string `json:"workspace"`
+	UserId     string `json:"user_id"`
+	GameName   string `json:"game_name"`
+	ServerIP   string `json:"server_ip"`
+	InstanceId string `json:"instance_id"`
+}
 
 func InitializeDynamoDB() (*DynamoDBService, error) {
 	region := os.Getenv("AWS_REGION")
@@ -84,7 +91,7 @@ func (svc *DynamoDBService) SaveSession(sessModel models.Session) error {
 	return nil
 }
 
-func (svc *DynamoDBService) GetActiveSessionsForUser(userID string, status string) ([]models.Session, error) {
+func (svc *DynamoDBService) GetSessionsBasedOnStatus(userID string, status string) ([]models.Session, error) {
 	table := os.Getenv("DYNAMO_TABLE")
 
 	input := &dynamodb.QueryInput{
@@ -162,14 +169,6 @@ func (svc *DynamoDBService) UpdateSessionStatusAndIP(sessionID, status, serverIP
 
 	log.Printf("Session updated successfully: %v", result.Attributes)
 	return nil
-}
-
-type Details struct {
-	Workspace  string `json:"workspace"`
-	UserId     string `json:"user_id"`
-	GameName   string `json:"game_name"`
-	ServerIP   string `json:"server_ip"`
-	InstanceId string `json:"instance_id"`
 }
 
 func (svc *DynamoDBService) GetDetailsBySessionID(sessionID string) (Details, error) {

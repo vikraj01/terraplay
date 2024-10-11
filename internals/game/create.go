@@ -35,7 +35,7 @@ func CreateGameSession(userID, globalName, gameName string) (models.Session, str
 		return models.Session{}, "", fmt.Errorf("invalid status")
 	}
 	statusString := config.StatusNames[statusEnum]
-	sessions, err := dynamoService.GetActiveSessionsForUser(userID, statusString)
+	sessions, err := dynamoService.GetSessionsBasedOnStatus(userID, statusString)
 	if err != nil {
 		log.Printf("Error fetching active sessions for user %s: %v", userID, err)
 		return models.Session{}, "", fmt.Errorf("failed to retrieve active sessions")

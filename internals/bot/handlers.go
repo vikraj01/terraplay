@@ -1,18 +1,20 @@
 package bot
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/vikraj01/terraplay/internals/bot/handlers"
 )
 
 var commandMap = map[string]func(*discordgo.Session, *discordgo.MessageCreate){
-	"!ping":          handlePingCommand,
-	"!create":        handleCreateCommand,
-	"!destroy":       handleDestroyCommand,
-	"!list-sessions": handleListSessionCommand,
-	"!list-games":    handleListGamesCommand,
-	"!stop":          handleStopCommand,
-	"!restart":       handleRestartCommand,
+	"!ping":          handlers.HandlePingCommand,
+	"!create":        handlers.HandleCreateCommand,
+	"!destroy":       handlers.HandleDestroyCommand,
+	"!list-sessions": handlers.HandleListSessionCommand,
+	"!list-games":    handlers.HandleListGamesCommand,
+	"!stop":          handlers.HandleStopCommand,
+	"!restart":       handlers.HandleRestartCommand,
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
