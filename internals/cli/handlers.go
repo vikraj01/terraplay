@@ -8,4 +8,6 @@ import (
 func RegisterCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(commands.LoginCmd)
 	rootCmd.AddCommand(commands.CreateGameCmd)
+	rootCmd.AddCommand(commands.StopGameCmd)
+	rootCmd.AddCommand(commands.RestartGameCmd)	
 }
