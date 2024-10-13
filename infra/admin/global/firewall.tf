@@ -76,3 +76,4 @@ module "bot_firewall" {
   } })
   egress_rules = local.common_egress_rules
 }
+  

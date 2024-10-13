@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   teeworlds:
-    image: teeworlds/teeworlds
+    image: riftbit/teeworlds
     container_name: teeworlds
     volumes:
       - /opt/teeworlds/data:/config

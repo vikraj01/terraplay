@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   wesnoth:
-    image: wesnoth/wesnoth
+    image: wesnoth/wesnoth:msys2-base
     container_name: wesnoth
     volumes:
       - /opt/wesnoth/data:/config
