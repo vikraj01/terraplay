@@ -11,7 +11,7 @@ import (
 func sendToDiscord(userID, game, status, serverIP, runID string) {
 	token := os.Getenv("DISCORD_BOT_TOKEN")
 	if token == "" {
-		log.Fatalf("DISCORD_BOT_TOKEN is not set")
+		log.Fatalf("DISCORD_BOT_TOKEN is not set!")
 	}
 
 	channelID := os.Getenv("DISCORD_CHANNEL_ID")
