@@ -93,7 +93,7 @@ func sendToDiscordForStopAction(runID, status string) error {
 
 	_, err = dg.ChannelMessageSend(channelID, message)
 	if err != nil {
-		log.Printf("Failed to send message to Discord: %v", err)
+		log.Printf("Failed to send message to Discord : %v", err)
 		return err
 	}
 
