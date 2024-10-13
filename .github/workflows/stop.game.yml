@@ -28,8 +28,8 @@ jobs:
             
             - name: Setup Infrastructure
               run: |
-                chmod +x ./scripts/kill.sh
-                ./scripts/kill.sh ${{ github.event.inputs.workspace }}
+                chmod +x ./scripts/destroy.sh
+                ./scripts/destroy.sh ${{ github.event.inputs.workspace }}
               working-directory: ./infra
             
             - name: Output Inputs

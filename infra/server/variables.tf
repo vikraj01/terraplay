@@ -16,7 +16,7 @@ variable "instance_type" {
 
 variable "subnet_id" {
   description = "The subnet ID to launch the instance in."
-  type        = string
+  type        = string  
 }
 
 variable "security_group_ids" {
@@ -51,3 +51,4 @@ variable "key_name" {
   type    = string
   default = null
 }
+  
