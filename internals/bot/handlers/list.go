@@ -51,11 +51,13 @@ func formatSessionDetails(sessions []models.Session) string {
 			"**Game:** %s\n"+
 				"**Status:** %s\n"+
 				"**Run ID:** `%s`\n"+
-				"**Start Time:** %s\n\n",
+				"**Start Time:** %s\n\n"+
+				"**Server IP:** %s\n\n",
 			session.GameName,
 			session.Status,
 			session.SessionId,
 			session.StartTime.Format(time.RFC1123),
+			session.ServerIP,
 		))
 	}
 	return messageBuilder.String()
