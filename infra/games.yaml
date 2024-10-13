@@ -1,17 +1,190 @@
 games:
-  minetest:
-    description: "This the required firewall rule for minetest client to connect"
+  minecraft:
+    description: "This is the required firewall rule for Minecraft clients to connect"
     ingress_rules:
-    - minetest_tcp:
-        description: "Allow Minecraft Server TCP Traffic"
-        from_port: 30000
-        to_port: 30000
-        protocol: "tcp"
-        cidr_blocks: ["0.0.0.0/0"]
+      - minecraft_tcp:
+          description: "Allow Minecraft Server TCP Traffic"
+          from_port: 25565
+          to_port: 25565
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+      - minecraft_udp:
+          description: "Allow Minecraft Server UDP Traffic (if needed)"
+          from_port: 25565
+          to_port: 25565
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
 
-    - minetest_udp:
-        description: "Allow Minecraft Server UDP Traffic"
-        from_port: 30000
-        to_port: 30000
-        protocol: "udp"
-        cidr_blocks: ["0.0.0.0/0"]
+  csgo:
+    description: "This is the required firewall rule for CS:GO clients to connect"
+    ingress_rules:
+      - csgo_udp:
+          description: "Allow CS:GO Server UDP Traffic"
+          from_port: 27015
+          to_port: 27015
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+      - csgo_tcp:
+          description: "Allow CS:GO Server TCP Traffic"
+          from_port: 27015
+          to_port: 27015
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  rust:
+    description: "This is the required firewall rule for Rust clients to connect"
+    ingress_rules:
+      - rust_tcp:
+          description: "Allow Rust Server TCP Traffic"
+          from_port: 28015
+          to_port: 28015
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+      - rust_udp:
+          description: "Allow Rust Server UDP Traffic"
+          from_port: 28015
+          to_port: 28015
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  factorio:
+    description: "This is the required firewall rule for Factorio clients to connect"
+    ingress_rules:
+      - factorio_udp:
+          description: "Allow Factorio Server UDP Traffic"
+          from_port: 34197
+          to_port: 34197
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  unturned:
+    description: "This is the required firewall rule for Unturned clients to connect"
+    ingress_rules:
+      - unturned_udp_27015:
+          description: "Allow Unturned Server UDP Traffic on port 27015"
+          from_port: 27015
+          to_port: 27015
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+      - unturned_udp_27016:
+          description: "Allow Unturned Server UDP Traffic on port 27016"
+          from_port: 27016
+          to_port: 27016
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  terraria:
+    description: "This is the required firewall rule for Terraria clients to connect"
+    ingress_rules:
+      - terraria_tcp:
+          description: "Allow Terraria Server TCP Traffic"
+          from_port: 7777
+          to_port: 7777
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  valheim:
+    description: "This is the required firewall rule for Valheim clients to connect"
+    ingress_rules:
+      - valheim_udp:
+          description: "Allow Valheim Server UDP Traffic"
+          from_port: 2456
+          to_port: 2458
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  minetest:
+    description: "This is the required firewall rule for Minetest clients to connect"
+    ingress_rules:
+      - minetest_tcp:
+          description: "Allow Minetest Server TCP Traffic"
+          from_port: 30000
+          to_port: 30000
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+      - minetest_udp:
+          description: "Allow Minetest Server UDP Traffic"
+          from_port: 30000
+          to_port: 30000
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  openttd:
+    description: "This is the required firewall rule for OpenTTD clients to connect"
+    ingress_rules:
+      - openttd_tcp:
+          description: "Allow OpenTTD Server TCP Traffic"
+          from_port: 3979
+          to_port: 3979
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  teeworlds:
+    description: "This is the required firewall rule for Teeworlds clients to connect"
+    ingress_rules:
+      - teeworlds_udp:
+          description: "Allow Teeworlds Server UDP Traffic"
+          from_port: 8303
+          to_port: 8303
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  xonotic:
+    description: "This is the required firewall rule for Xonotic clients to connect"
+    ingress_rules:
+      - xonotic_udp:
+          description: "Allow Xonotic Server UDP Traffic"
+          from_port: 26000
+          to_port: 26000
+          protocol: "udp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  freeciv:
+    description: "This is the required firewall rule for Freeciv clients to connect"
+    ingress_rules:
+      - freeciv_tcp:
+          description: "Allow Freeciv Server TCP Traffic"
+          from_port: 5556
+          to_port: 5556
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  wesnoth:
+    description: "This is the required firewall rule for Wesnoth clients to connect"
+    ingress_rules:
+      - wesnoth_tcp:
+          description: "Allow Wesnoth Server TCP Traffic"
+          from_port: 15000
+          to_port: 15000
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  openra:
+    description: "This is the required firewall rule for OpenRA clients to connect"
+    ingress_rules:
+      - openra_tcp:
+          description: "Allow OpenRA Server TCP Traffic"
+          from_port: 1234
+          to_port: 1234
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  veloren:
+    description: "This is the required firewall rule for Veloren clients to connect"
+    ingress_rules:
+      - veloren_tcp:
+          description: "Allow Veloren Server TCP Traffic"
+          from_port: 14004
+          to_port: 14004
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]
+
+  hedgewars:
+    description: "This is the required firewall rule for Hedgewars clients to connect"
+    ingress_rules:
+      - hedgewars_tcp:
+          description: "Allow Hedgewars Server TCP Traffic"
+          from_port: 46631
+          to_port: 46631
+          protocol: "tcp"
+          cidr_blocks: ["0.0.0.0/0"]

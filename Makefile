@@ -9,6 +9,7 @@ clean:
 
 build-linux:
 	GOOS=linux GOARCH=amd64 $(BUILD_CMD)
+	# rm -f $(BINARY_NAME)
 
 build-macos:
 	GOOS=darwin GOARCH=amd64 $(BUILD_CMD)

@@ -15,6 +15,7 @@ func RegisterRoutes(router *gin.Engine) {
 		protected.POST("/game/stop", controllers.StopGame)
 		protected.POST("/game/restart", controllers.RestartGame)
 		protected.GET("/game/sessions", controllers.ListSessions)
+		protected.DELETE("/game/destroy/:session_id", controllers.DestroySession)
 	}
 
 	router.GET("/game/list", controllers.ListGames)

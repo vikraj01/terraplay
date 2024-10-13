@@ -8,15 +8,20 @@ type GameConfig struct {
 var AllGameConfigs = []GameConfig{
 	{Name: "minecraft", VolumePath: "/opt/minecraft/data"},
 	{Name: "csgo", VolumePath: "/opt/csgo/data"},
-	{Name: "team_fortress_2", VolumePath: "/opt/tf2/data"},
-	{Name: "left_4_dead_2", VolumePath: "/opt/left4dead2/data"},
-	{Name: "ark_survival_evolved", VolumePath: "/opt/ark/data"},
 	{Name: "rust", VolumePath: "/opt/rust/data"},
 	{Name: "factorio", VolumePath: "/opt/factorio/data"},
 	{Name: "unturned", VolumePath: "/opt/unturned/data"},
 	{Name: "terraria", VolumePath: "/opt/terraria/data"},
 	{Name: "valheim", VolumePath: "/opt/valheim/data"},
 	{Name: "minetest", VolumePath: "/opt/minetest/data"},
+	{Name: "openttd", VolumePath: "/opt/openttd/data"},
+	{Name: "teeworlds", VolumePath: "/opt/teeworlds/data"},
+	{Name: "xonotic", VolumePath: "/opt/xonotic/data"},
+	{Name: "freeciv", VolumePath: "/opt/freeciv/data"},
+	{Name: "wesnoth", VolumePath: "/opt/wesnoth/data"},
+	{Name: "openra", VolumePath: "/opt/openra/data"},
+	{Name: "veloren", VolumePath: "/opt/veloren/data"},
+	{Name: "hedgewars", VolumePath: "/opt/hedgewars/data"},
 }
 
 func (gc *GameConfig) GetVolumePath() string {

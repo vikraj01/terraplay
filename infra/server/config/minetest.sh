@@ -15,7 +15,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo mkdir -p /opt/minetest/data
 sudo chown -R ec2-user:ec2-user /opt/minetest
 
-cat <<EOF > /opt/minetest/docker-compose.yml
+cat <<EOF >/opt/minetest/docker-compose.yml
 version: '3.8'
 
 services:
@@ -36,7 +36,7 @@ EOF
 
 sudo chown -R ec2-user:ec2-user /opt/minetest
 
-cd /opt/minetest
+cd /opt/minetest || exit
 sudo /usr/local/bin/docker-compose up -d
 
 echo "Minetest server setup is complete!"
