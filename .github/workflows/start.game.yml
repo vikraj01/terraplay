@@ -32,8 +32,8 @@ jobs:
 
       - name: Setup Infrastructure And Output
         run: |
-          chmod +x ./scripts/start.sh
-          ./scripts/start.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
+          chmod +x ./scripts/create.sh
+          ./scripts/create.sh ${{ github.event.inputs.game }} ${{ github.event.inputs.user_id }}
         working-directory: ./infra
 
       - name: Output Inputs
