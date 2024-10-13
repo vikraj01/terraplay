@@ -65,11 +65,12 @@ func listSessions(cmd *cobra.Command, args []string) {
 	fmt.Println("📋 Listing Sessions 📋")
 	for _, session := range responseBody.Sessions {
 		fmt.Printf(
-			"Game: %s\nStatus: %s\nRun ID: %s\nStart Time: %s\n\n",
+			"Game: %s\nStatus: %s\nRun ID: %s\nStart Time: %s\nServer IP: %s\n",
 			session["game"],
 			session["status"],
 			session["run_id"],
 			session["start_time"],
+			session["server_ip"],
 		)
 	}
 }
