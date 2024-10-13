@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   openttd:
-    image: openlabs/docker-openttd
+    image: bateau/openttd
     container_name: openttd
     volumes:
       - /opt/openttd/data:/config

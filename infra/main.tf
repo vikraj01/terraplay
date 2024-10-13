@@ -24,12 +24,12 @@ module "game_server" {
   ebs_volumes = [
     {
       device_name = "/dev/sdf"
-      volume_size = 50
+      volume_size = 100
       volume_type = "gp3"
     },
     {
       device_name = "/dev/sdg"
-      volume_size = 100
+      volume_size = 200
       volume_type = "gp3"
     }
   ]

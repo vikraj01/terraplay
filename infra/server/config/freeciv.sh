@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   freeciv:
-    image: freeciv/freeciv
+    image: chedy007/freeciv:1.0
     container_name: freeciv
     volumes:
       - /opt/freeciv/data:/config

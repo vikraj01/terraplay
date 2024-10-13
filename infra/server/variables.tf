@@ -2,10 +2,6 @@ variable "game" {
   type        = string
   description = "The name of the game server to set up."
   default     = ""
-  validation {
-    condition     = contains(["minecraft", "terraria", "valheim", "minetest", ""], lower(var.game))
-    error_message = "The game must be one of: Minecraft, Terraria, Valheim."
-  }
 }
 
 variable "instance_type" {
