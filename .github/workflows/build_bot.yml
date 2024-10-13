@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_and_push:
-    if: ${{ !contains(github.event.head_commit.message, '@global') }}
+    if: contains(github.event.head_commit.message, '@server')
     runs-on: ubuntu-latest
 
     outputs:
