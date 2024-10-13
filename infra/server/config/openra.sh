@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   openra:
-    image: openra/server
+    image: rmoriz/openra:latest
     container_name: openra
     volumes:
       - /opt/openra/data:/config
