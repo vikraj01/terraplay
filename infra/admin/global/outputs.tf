@@ -21,7 +21,7 @@ output "security_group_ids" {
   value       = { for game, mod in module.server_firewall : game => mod.security_group_id }
   description = "Security group IDs for each game's firewall."
   sensitive   = true
-}
+} 
 
 
 # -------------------------
