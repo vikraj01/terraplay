@@ -1,3 +1,4 @@
+#!/usr/bin/bash
 WORKSPACE=$1
 DEFAULT="default"
 
