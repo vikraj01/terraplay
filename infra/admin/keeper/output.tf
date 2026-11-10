@@ -32,3 +32,8 @@ output "bucket_arn" {
   description = "The ARN of the created S3 bucket."
   value       = module.backend_storage.bucket_arn
 }
+
+output "github_actions_role_arn" {
+  description = "Set this as the AWS_ROLE_ARN repository secret."
+  value       = aws_iam_role.github_actions.arn
+}
