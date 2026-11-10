@@ -48,3 +48,8 @@ variable "managed_by" {
   type        = string
   default     = "Terraform"
 }
+variable "github_repository" {
+  description = "GitHub repository (owner/name) whose workflows may assume the CI role."
+  type        = string
+  default     = "vikraj01/terraplay"
+}
